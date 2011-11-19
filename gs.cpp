@@ -42,6 +42,8 @@ struct _cmd_tbl {
 		{"AT+DNSLOOKUP="},
 		{"AT+NCLOSE="},
 		{"AT+NSET="},
+		{"AT+WM=2"},
+		{"AT+DHCPSRVR=1"},
 };
 
 uint8_t hex_to_int(char c)
@@ -121,6 +123,8 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_ENABLE_DHCP:
 	case CMD_LISTEN:
 	case CMD_GET_MAC_ADDR:
+	case CMD_WIRELESS_MODE:
+	case CMD_ENABLE_DHCPSVR:
 	{
 		Serial.println(cmd_tbl[cmd].cmd_str);
 		break;
@@ -133,7 +137,11 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	}
 	case CMD_SET_SSID:
 	{
-		String cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid;
+		String cmd_buf;
+		if (mode == 0)
+			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid;
+		else if (mode == 2)
+			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid + ",,11";
 		Serial.println(cmd_buf);
 		break;
 	}
@@ -145,7 +153,12 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	}
 	case CMD_NETWORK_SET:
 	{
-		String cmd_buf = cmd_tbl[cmd].cmd_str + this->local_ip + "," + this->subnet + "," + this->gateway;
+		//String cmd_buf = cmd_tbl[cmd].cmd_str + this->local_ip + "," + this->subnet + "," + this->gateway;
+		String cmd_buf = cmd_tbl[cmd].cmd_str + this->local_ip;
+		cmd_buf +=  ",";
+		cmd_buf += this->subnet;
+		cmd_buf += ",";
+		cmd_buf += this->gateway;
 		Serial.println(cmd_buf);
 		break;
 	}
@@ -189,6 +202,8 @@ uint8_t GSClass::parse_resp(uint8_t cmd)
 		case CMD_SET_SSID:
 		case CMD_ENABLE_DHCP:
 		case CMD_NETWORK_SET:
+		case CMD_WIRELESS_MODE:
+		case CMD_ENABLE_DHCPSVR:
 		{
 			if (buf == "OK") {
 				/* got OK */
@@ -339,23 +354,40 @@ uint8_t GSClass::connect()
 		return 0;
 	}
 
-	if (!send_cmd_w_resp(CMD_SET_WPA_PSK)) {
-		return 0;
-	}
-
-	if (!send_cmd_w_resp(CMD_SET_SSID)) {
-		return 0;
-	}
-
-	if (this->local_ip == NULL) {
-		if (!send_cmd_w_resp(CMD_ENABLE_DHCP)) {
+	if (mode == 0) {
+		if (!send_cmd_w_resp(CMD_SET_WPA_PSK)) {
 			return 0;
 		}
-	} else {
+
+		if (!send_cmd_w_resp(CMD_SET_SSID)) {
+			return 0;
+		}
+
+		if (this->local_ip == NULL) {
+			if (!send_cmd_w_resp(CMD_ENABLE_DHCP)) {
+				return 0;
+			}
+		} else {
+			if (!send_cmd_w_resp(CMD_NETWORK_SET)) {
+				return 0;
+			}
+		}
+
+	} else if (mode == 2) {
 		if (!send_cmd_w_resp(CMD_NETWORK_SET)) {
+                	return 0;
+                }
+		if (!send_cmd_w_resp(CMD_WIRELESS_MODE)) {
+                        return 0;
+                }
+		if (!send_cmd_w_resp(CMD_SET_SSID)) {
+                        return 0;
+                }
+		if (!send_cmd_w_resp(CMD_ENABLE_DHCPSVR)) {
 			return 0;
 		}
-	}
+		
+	} 
 
 	connection_state = DEV_CONN_ST_CONNECTED;
 
@@ -642,23 +674,6 @@ uint8_t GSClass::connect_socket(String ip, String port)
 	}
 
 	return 1;
-}
-
-void GSClass::send_data(String data)
-{
-	tx_done = 0;
-
-	Serial.print((uint8_t)0x1b);    // data start
-	Serial.print((uint8_t)0x53);
-	Serial.print((uint8_t)int_to_hex(this->client_cid));  // connection ID
-	Serial.print(data);           // data to send
-	Serial.print((uint8_t)0x1b);    // data end
-	Serial.print((uint8_t)0x45);
-
-	//while(!tx_done) {
-	//	process();
-	//}
-	delay(10);
 }
 
 String GSClass::dns_lookup(String url)

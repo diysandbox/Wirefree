@@ -77,11 +77,17 @@ void Wirefree::setLED(int color)
 	}	
 }
 
-
 void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data))
+{
+	begin(w_prof, rxDataHndlr, NORMAL_MODE);
+}
+
+void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode)
 {
 	// setup LEDs
 	initLED();
+
+	GS.mode = mode;
 	
 	// initialize device
 	if (!GS.init(rxDataHndlr)) {

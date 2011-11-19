@@ -56,6 +56,8 @@ public:
 #define CMD_DNS_LOOKUP   9
 #define CMD_CLOSE_CONN   10
 #define CMD_NETWORK_SET  11
+#define CMD_WIRELESS_MODE 12
+#define CMD_ENABLE_DHCPSVR 13
 
 // device operation modes
 #define DEV_OP_MODE_COMMAND 0
@@ -87,6 +89,7 @@ typedef struct _SOCK_TABLE {
 
 class GSClass {
 public:
+	uint8_t mode;
 	uint8_t init(void (*rx_data_handler)(String data));
 	void configure(GS_PROFILE* prof);
 	uint8_t connect();

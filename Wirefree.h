@@ -39,6 +39,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define LED_WHITE       6
 #define LED_OFF         7
 
+#define NORMAL_MODE     0
+#define ADHOC_MODE      1
+#define AP_MODE         2
 
 typedef struct _WIFI_PROFILE {
 	String ssid;
@@ -56,6 +59,7 @@ public:
   static uint16_t _server_port[MAX_SOCK_NUM];
 
   void begin(WIFI_PROFILE*, void (*rxDataHndlr)(String data));
+  void begin(WIFI_PROFILE*, void (*rxDataHndlr)(String data), uint8_t mode);
 
   void process();
   uint8_t connected();
