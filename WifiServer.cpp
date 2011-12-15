@@ -1,5 +1,5 @@
 /*
-Server.cpp - network server class 
+WifiServer.cpp - network server class 
 
 Copyright (C) 2011 DIYSandbox LLC
 
@@ -26,18 +26,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //}
 
 #include "Wirefree.h"
-#include "Client.h"
-#include "Server.h"
+#include "WifiClient.h"
+#include "WifiServer.h"
 
-Server::Server(uint16_t port)
+WifiServer::WifiServer(uint16_t port)
 {
   _port = port;
 }
 
-void Server::begin()
+void WifiServer::begin()
 {
   for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-    Client client(sock);
+    WifiClient client(sock);
     if (client.status() == SOCK_STATUS::CLOSED) {
       socket(sock, IPPROTO::TCP, _port, 0);
       listen(sock);
@@ -47,24 +47,24 @@ void Server::begin()
   }  
 }
 
-void Server::write(uint8_t b)
+ARETTYPE WifiServer::write(uint8_t b)
 {
 }
 
-void Server::write(const char *str)
+ARETTYPE WifiServer::write(const char *str)
 {
 }
 
-void Server::write(const uint8_t *buffer, size_t size)
+ARETTYPE WifiServer::write(const uint8_t *buffer, size_t size)
 {
 }
 
-void Server::accept()
+void WifiServer::accept()
 {
   int listening = 0;
 
   for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-    Client client(sock);
+    WifiClient client(sock);
 
     if (Wirefree::_server_port[sock] == _port) {
       if (client.status() == SOCK_STATUS::LISTEN) {
@@ -81,14 +81,14 @@ void Server::accept()
   }
 }
 
-Client Server::available()
+WifiClient WifiServer::available()
 {
     GS.process();
 
   accept();
 
   for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-    Client client(sock);
+    WifiClient client(sock);
     if (/*Wirefree::_server_port[sock] == _port &&*/
         (client.status() == SOCK_STATUS::ESTABLISHED ||
          client.status() == SOCK_STATUS::CLOSE_WAIT))
@@ -100,26 +100,26 @@ Client Server::available()
     }
   }
 
-  return Client(MAX_SOCK_NUM);
+  return WifiClient(MAX_SOCK_NUM);
 }
 
 #if 0
-void Server::write(uint8_t b) 
+void WifiServer::write(uint8_t b) 
 {
   write(&b, 1);
 }
 
-void Server::write(const char *str) 
+void WifiServer::write(const char *str) 
 {
   write((const uint8_t *)str, strlen(str));
 }
 
-void Server::write(const uint8_t *buffer, size_t size) 
+void WifiServer::write(const uint8_t *buffer, size_t size) 
 {
   accept();
 
   for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-    Client client(sock);
+    WifiClient client(sock);
 
     if (EthernetClass::_server_port[sock] == _port &&
       client.status() == SnSR::ESTABLISHED) {

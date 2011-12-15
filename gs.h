@@ -139,6 +139,8 @@ private:
 	uint8_t send_cmd_w_resp(uint8_t cmd);
 	void parse_cmd(String buf);
 	void parse_data(String buf);
+
+	void flush();
 };
 
 extern GSClass GS;

@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <Wirefree.h>
-#include <Server.h>
+#include <WifiServer.h>
 
 WIFI_PROFILE w_prof = { "DiySandbox",       /* SSID */
                         "12345678" ,        /* Not Currently used in AP_MODE */
@@ -29,7 +29,7 @@ WIFI_PROFILE w_prof = { "DiySandbox",       /* SSID */
                       };
                               
 // port 80 is default for HTTP
-Server server(80);
+WifiServer server(80);
 
 void parseRxData(String data)
 {
@@ -47,7 +47,7 @@ void setup()
 void loop()
 {
   // Listen for incoming clients
-  Client client = server.available();
+  WifiClient client = server.available();
   int count = 0;
   
   if (client) {
@@ -76,19 +76,21 @@ void loop()
           client.println("<html><head><title>LED Demo</title></head><body>");
           client.println("<center><h1>DIY Sandbox LED Color Change Demo</h1>");
 
-	  client.println("<p><form method=\"get\" action=\"\"><select name=\"l\">");
+          client.println("<p><form method=\"get\" action=\"\"><select name=\"l\">");
           client.println("<option value=\"r\">Red</option>");
           client.println("<option value=\"g\">Green</option>");
-	  client.println("<option value=\"b\">Blue</option>");
+          client.println("<option value=\"b\">Blue</option>");
           client.println("<option value=\"c\">Cyan</option>");
           
           client.println("<option value=\"m\">Magenta</option>");       
           client.println("<option value=\"y\">Yellow</option>");
-	  client.println("<option value=\"w\">White</option>");
+          client.println("<option value=\"w\">White</option>");
           client.println("</select><input type=\"submit\" value=\"Change\" /></form></p>");
 
           client.println("</center></body></html>");  
           client.println("");  
+
+          client.flush();
 
           break;         
         }

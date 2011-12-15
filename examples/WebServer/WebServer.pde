@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <Wirefree.h>
-#include <Server.h>
+#include <WifiServer.h>
 
 WIFI_PROFILE w_prof = { "Cisco32371",       /* SSID */
                         "12345678" ,        /* WPA/WPA2 passphrase */
@@ -29,7 +29,7 @@ WIFI_PROFILE w_prof = { "Cisco32371",       /* SSID */
                       };
 
 // port 80 is default for HTTP
-Server server(80);
+WifiServer server(80);
 
 void parseRxData(String data)
 {
@@ -47,7 +47,7 @@ void setup()
 void loop()
 {
   // Listen for incoming clients
-  Client client = server.available();
+  WifiClient client = server.available();
   if (client) {
     // an HTTP request ends with a blank line
     boolean currentLineIsBlank = true;
@@ -76,6 +76,8 @@ void loop()
           client.write('M');
           client.println("<p>Hello World...</p>");
           client.println("</body></html>");
+
+          client.flush();
 
           break;         
         }

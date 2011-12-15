@@ -124,5 +124,5 @@ uint8_t connect(SOCKET s, String addr, uint16_t port)
 		return 0;
 	
 	// set destination IP
-	return GS.connect_socket(ip, port);	
+	return GS.connect_socket(ip, (String)port);	
 }

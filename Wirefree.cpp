@@ -20,8 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Wirefree.h"
 #include "gs.h"
-
-#include <WProgram.h>
+#include "global.h"
 
 uint16_t Wirefree::_server_port[MAX_SOCK_NUM] = {
   0, 0, 0, 0 };

@@ -1,5 +1,5 @@
 /*
-Client.cpp - network client class 
+WifiClient.cpp - network client class 
 
 Copyright (C) 2011 DIYSandbox LLC
 
@@ -20,22 +20,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gs.h"
 #include "socket.h"
-#include "WProgram.h"
 
 #include "Wirefree.h"
-#include "Client.h"
-#include "Server.h"
+#include "WifiClient.h"
+#include "WifiServer.h"
 
-uint16_t Client::_srcport = 1024;
+uint16_t WifiClient::_srcport = 1024;
 
-Client::Client(uint8_t sock) : _sock(sock) {
+WifiClient::WifiClient(uint8_t sock) : _sock(sock) {
 }
 
-Client::Client(String ip, uint16_t port) : _ip(ip), _port(port), _sock(MAX_SOCK_NUM) {
+WifiClient::WifiClient(String ip, uint16_t port) : _ip(ip), _port(port), _sock(MAX_SOCK_NUM) {
 }
 
 
-uint8_t Client::connect() {
+uint8_t WifiClient::connect() {
 	if (_sock != MAX_SOCK_NUM)
 		return 0;
 	
@@ -70,28 +69,28 @@ uint8_t Client::connect() {
 	return 1;
 }
 
-uint8_t Client::status() {
+uint8_t WifiClient::status() {
   if (_sock == MAX_SOCK_NUM) return SOCK_STATUS::CLOSED;
   return GS.readSocketStatus(_sock);
 }
 
-void Client::write(uint8_t b) {
+ARETTYPE WifiClient::write(uint8_t b) {
 	if (_sock != MAX_SOCK_NUM)
 		send(_sock, &b, 1);
 
 }
 
-void Client::write(const char *str) {
+ARETTYPE WifiClient::write(const char *str) {
 	if (_sock != MAX_SOCK_NUM)
 		send(_sock, (const uint8_t *)str, strlen(str));
 }
 
-void Client::write(const uint8_t *buf, size_t size) {
+ARETTYPE WifiClient::write(const uint8_t *buf, size_t size) {
 	if (_sock != MAX_SOCK_NUM)
 		send(_sock, buf, size);
 }
 
-int Client::available() {
+int WifiClient::available() {
 	if (_sock != MAX_SOCK_NUM) {
 		if (GS.isDataOnSock(_sock)) {
 			return 1;
@@ -104,7 +103,7 @@ int Client::available() {
 	return 0;
 }
 
-int Client::read() {
+int WifiClient::read() {
   uint8_t b = 0;
   if (!available() || (recv(_sock, &b, 1) != 1))
     return -1;
@@ -112,18 +111,20 @@ int Client::read() {
   return b;
 }
 
-int Client::peek() {
+int WifiClient::peek() {
   return 0;
 }
 
-void Client::flush() {
+void WifiClient::flush() {
+	while (available())
+		read();
 }
 
-Client::operator bool() {
+WifiClient::operator bool() {
   return _sock != MAX_SOCK_NUM;
 }
 
-uint8_t Client::connected() {
+uint8_t WifiClient::connected() {
   if (_sock == MAX_SOCK_NUM) return 0;
 
   //uint8_t s = status();
@@ -133,7 +134,7 @@ uint8_t Client::connected() {
   return (status() == SOCK_STATUS::ESTABLISHED);
 }
 
-void Client::stop() {
+void WifiClient::stop() {
   if (_sock == MAX_SOCK_NUM)
     return;
 

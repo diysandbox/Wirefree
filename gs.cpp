@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <avr/interrupt.h>
 #include <HardwareSerial.h>
-#include <WProgram.h>
+#include "global.h"
 
 #include "gs.h"
 
@@ -82,7 +82,7 @@ uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
 	Serial.begin(9600);
 	delay(1000);
 
-	Serial.flush();
+	flush();
 	Serial.println();
 	delay(1000);
 
@@ -114,7 +114,7 @@ uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
 
 uint8_t GSClass::send_cmd(uint8_t cmd)
 {
-	Serial.flush();
+	flush();
 
 	switch(cmd) {
 	case CMD_DISABLE_ECHO:
@@ -490,12 +490,12 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 {	
 	if ((len == 0) || (buf[0] == '\r')){
 	} else {
-		Serial.print((uint8_t)0x1b);    // data start
-		Serial.print((uint8_t)0x53);
-		Serial.print((uint8_t)int_to_hex(this->client_cid));  // connection ID
+		Serial.write((uint8_t)0x1b);    // data start
+		Serial.write((uint8_t)0x53);
+		Serial.write((uint8_t)int_to_hex(this->client_cid));  // connection ID
 		if (len == 1){
 			if (buf[0] != '\r' && buf[0] != '\n'){ 
-				Serial.print(buf[0]);           // data to send
+				Serial.write(buf[0]);           // data to send
 			} else if (buf[0] == '\n') {
 				Serial.print("\n\r");           // new line
 			} 
@@ -504,8 +504,8 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 				buffer = (const char *)buf;
 				Serial.print(buffer);
 		}
-		Serial.print((uint8_t)0x1b);    // data end
-		Serial.print((uint8_t)0x45);		
+		Serial.write((uint8_t)0x1b);    // data end
+		Serial.write((uint8_t)0x45);		
 	}
 	delay(10);
 
@@ -715,5 +715,18 @@ uint8_t GSClass::readSocketStatus(SOCKET s)
 uint8_t GSClass::isDataOnSock(SOCKET s)
 {
     return (s == dataOnSock);
+}
+
+void GSClass::flush()
+{
+	// arduino-1.0 repurposed the Serial.flush() command
+	// to wait for outgoing data to be transmitted, not to
+	// clear the buffer
+	// since we need to clear the buffer, need to create this
+	// workaround
+	while (Serial.available())
+	{
+		Serial.read();
+	}
 }
 

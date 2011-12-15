@@ -1,5 +1,5 @@
 /*
-Server.h - network server class 
+WifiServer.h - network server class 
 
 Copyright (C) 2011 DIYSandbox LLC
 
@@ -18,26 +18,27 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#ifndef _server_h_
-#define _server_h_
+#ifndef _wifi_server_h_
+#define _wifi_server_h_
 
+#include "global.h"
 #include "Print.h"
 
-class Client;
+class WifiClient;
 
-class Server : 
+class WifiServer : 
 public Print {
 private:
   uint16_t _port;
   void accept();
 public:
-  Server(uint16_t);
-  Client available();
+  WifiServer(uint16_t);
+  WifiClient available();
   void begin();
-  virtual void write(uint8_t);
-  virtual void write(const char *str);
-  virtual void write(const uint8_t *buf, size_t size);
+  virtual ARETTYPE write(uint8_t);
+  virtual ARETTYPE write(const char *str);
+  virtual ARETTYPE write(const uint8_t *buf, size_t size);
 };
 
-#endif // _server_h_
+#endif // _wifi_server_h_
 

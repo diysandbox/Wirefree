@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <Wirefree.h>
-#include <Client.h>
+#include <WifiClient.h>
 
 WIFI_PROFILE w_prof = { "Cisco32371",       /* SSID */
                         "12345678" ,        /* WPA/WPA2 passphrase */
@@ -33,7 +33,7 @@ String server = "74.125.224.83"; // Google
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
 // that you want to connect to (port 80 is default for HTTP):
-Client client(server, 80);
+WifiClient client(server, 80);
 
 void parseRxData(String data)
 {
@@ -50,6 +50,7 @@ void setup()
     
     // Make a HTTP request:
     client.println("GET /search?q=arduino HTTP/1.0\r\n\r\n");
+    client.flush();
   } 
   else {
     // kf you didn't get a connection to the server:
@@ -66,7 +67,7 @@ void loop()
   if (client.available()) {
     char c = client.read();
       // Uncomment if you need to see the response in the serial monitor
- //   Serial.print(c);
+ //   Serial.write(c);
   }
 
   // if the server's disconnected, stop the client:

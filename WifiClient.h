@@ -1,5 +1,5 @@
 /*
-Client.h - network client class 
+WifiClient.h - network client class 
 
 Copyright (C) 2011 DIYSandbox LLC
 
@@ -18,26 +18,26 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#ifndef _client_h_
-#define _client_h_
+#ifndef _wifi_client_h_
+#define _wifi_client_h_
 
-#include "WProgram.h"	
+#include "global.h"
 #include "Print.h"
 
-class Client : public Stream {
+class WifiClient : public Stream {
 
 public:
-  Client();
-  Client(uint8_t);
-  Client(String, uint16_t);
+  WifiClient();
+  WifiClient(uint8_t);
+  WifiClient(String, uint16_t);
 
   uint8_t status();
   uint8_t connect();
 
   //uint8_t connect();
-  virtual void write(uint8_t);
-  virtual void write(const char *str);
-  virtual void write(const uint8_t *buf, size_t size);
+  virtual ARETTYPE write(uint8_t);
+  virtual ARETTYPE write(const char *str);
+  virtual ARETTYPE write(const uint8_t *buf, size_t size);
   virtual int available();
   virtual int read();
   virtual int peek();
@@ -52,7 +52,7 @@ public:
   uint8_t operator!=(int);
 #endif
 
-  friend class Server;
+  friend class WifiServer;
 
 private:
   static uint16_t _srcport;
@@ -61,5 +61,5 @@ private:
 	String _ip;
 };
 
-#endif // _client_h_
+#endif // _wifi_client_h_
 

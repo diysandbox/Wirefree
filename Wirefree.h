@@ -24,8 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <avr/pgmspace.h>
 #include <WString.h>
 
-#include "Client.h"
-#include "Server.h"
+#include "WifiClient.h"
+#include "WifiServer.h"
 
 #define MAX_SOCK_NUM 4
 
@@ -68,8 +68,8 @@ public:
   void sendDeviceID();
   void sendResponse(String data);
 
-  friend class Client;
-  friend class Server;
+  friend class WifiClient;
+  friend class WifiServer;
 };
 
 extern Wirefree Wireless;
