@@ -73,7 +73,6 @@ void loop()
           // Output a simple basic HTML page
           client.println("<html><body>");
           client.println("<h1>DIYSandbox</h1>");
-          client.write('M');
           client.println("<p>Hello World...</p>");
           client.println("</body></html>");
 
