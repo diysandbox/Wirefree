@@ -109,7 +109,7 @@ public:
 	uint16_t readData(SOCKET s, uint8_t* buf, uint16_t len);
 	uint16_t writeData(SOCKET s, const uint8_t*  buf, uint16_t  len);
 	
-	static const uint16_t SSIZE = 2048; // Max Tx buffer siz
+	static const uint16_t SSIZE = 256; // Max Tx buffer siz
 
 private:
 	String security_key;
