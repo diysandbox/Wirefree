@@ -170,7 +170,8 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		Serial1.println(cmd_buf);
 #else
 		Serial.println(cmd_buf);
-#endif		break;
+#endif
+		break;
 	}
 	case CMD_TCP_CONN:
 	{
