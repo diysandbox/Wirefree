@@ -6,5 +6,8 @@ Jul 05 2011 - Initial version of WebServer code.
               Ethernet library is fully working
 
 Nov 07 2011 - Added WebServer & WebClient sketches
+
+Jan 29 2012 - Added compatibility with chipKIT Uno32 and Max32 (Max32 using Serial1
+              instead of Serial0). This version is experimental.
 	    
 

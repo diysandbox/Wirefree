@@ -3,6 +3,8 @@ gs.cpp - HAL driver to talk with Gainspan GS1011 WiFi module
 
 Copyright (C) 2011 DIYSandbox LLC
 
+Porting for chipKIT boards Copyright (c) 2012 http://electronics.trev.id.au
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
@@ -19,8 +21,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <stdio.h>
+
+#ifdef __PIC32MX__
+#include <stdint.h>
+#else
 #include <avr/interrupt.h>
 #include <HardwareSerial.h>
+#endif
+
 #include "global.h"
 
 #include "gs.h"
@@ -79,11 +87,19 @@ char int_to_hex(uint8_t c)
 
 uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
 {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+	Serial1.begin(9600);		// so use Serial1 (pins 18 & 19)
+#else
 	Serial.begin(9600);
+#endif
 	delay(1000);
 
 	flush();
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+	Serial1.println();
+#else
 	Serial.println();
+#endif
 	delay(1000);
 
 	dev_mode = DEV_OP_MODE_COMMAND;
@@ -126,13 +142,21 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_WIRELESS_MODE:
 	case CMD_ENABLE_DHCPSVR:
 	{
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.println(cmd_tbl[cmd].cmd_str);
+#else
 		Serial.println(cmd_tbl[cmd].cmd_str);
+#endif
 		break;
 	}
 	case CMD_SET_WPA_PSK:
 	{
 		String cmd_buf = cmd_tbl[cmd].cmd_str + this->security_key;
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.println(cmd_buf);
+#else
 		Serial.println(cmd_buf);
+#endif
 		break;
 	}
 	case CMD_SET_SSID:
@@ -142,13 +166,20 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid;
 		else if (mode == 2)
 			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid + ",,11";
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.println(cmd_buf);
+#else
 		Serial.println(cmd_buf);
-		break;
+#endif		break;
 	}
 	case CMD_TCP_CONN:
 	{
 		String cmd_buf = cmd_tbl[cmd].cmd_str + this->ip + "," + this->port;
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.println(cmd_buf);
+#else
 		Serial.println(cmd_buf);
+#endif
 		break;
 	}
 	case CMD_NETWORK_SET:
@@ -159,20 +190,32 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		cmd_buf += this->subnet;
 		cmd_buf += ",";
 		cmd_buf += this->gateway;
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.println(cmd_buf);
+#else
 		Serial.println(cmd_buf);
+#endif
 		break;
 	}
 	case CMD_DNS_LOOKUP:
 	{
 		String cmd_buf = cmd_tbl[cmd].cmd_str + this->dns_url_ip;
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.println(cmd_buf);
+#else
 		Serial.println(cmd_buf);
+#endif
 		break;
 	}
 	case CMD_CLOSE_CONN:
 	{
 		if (this->sock_table[socket_num].status != SOCK_STATUS::CLOSED) {
 			String cmd_buf = cmd_tbl[cmd].cmd_str + String((unsigned int)this->sock_table[socket_num].cid);
-			Serial.println(cmd_buf);
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.println(cmd_buf);
+#else
+		Serial.println(cmd_buf);
+#endif
 		} else {
 			return 0;
 		}
@@ -408,13 +451,21 @@ String GSClass::readline(void)
 
 	while (!endDetected)
 	{
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		if (Serial1.available())
+#else
 		if (Serial.available())
+#endif
 		{
 			// valid data in HW UART buffer, so check if it's \r or \n
 			// if so, throw away
 			// if strBuf length greater than 0, then this is a true end of line,
 			// so break out
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+			inByte = Serial1.read();
+#else
 			inByte = Serial.read();
+#endif
 
 			if ((inByte == '\r') || (inByte == '\n'))
 			{
@@ -440,20 +491,33 @@ uint16_t GSClass::readData(SOCKET s, uint8_t* buf, uint16_t len)
     uint8_t tmp1, tmp2;
 
     if (dev_mode == DEV_OP_MODE_DATA_RX) {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+    if (!Serial1.available())
+#else
     if (!Serial.available())
+#endif
         return 0;
 
     while(dataLen < len) {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+        if (Serial1.available()) {
+            tmp1 = Serial1.read();
+#else
         if (Serial.available()) {
             tmp1 = Serial.read();
-
+#endif
             if (tmp1 == 0x1b) {
                 // escape seq
 
                 /* read in escape sequence */
                 while(1) {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+                    if (Serial1.available()) {
+                        tmp2 = Serial1.read();
+#else
                     if (Serial.available()) {
                         tmp2 = Serial.read();
+#endif
                         break;
                     }
                 }
@@ -490,22 +554,45 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 {	
 	if ((len == 0) || (buf[0] == '\r')){
 	} else {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.write((uint8_t)0x1b);    // data start
+		Serial1.write((uint8_t)0x53);
+		Serial1.write((uint8_t)int_to_hex(this->client_cid));  // connection ID
+#else
 		Serial.write((uint8_t)0x1b);    // data start
 		Serial.write((uint8_t)0x53);
 		Serial.write((uint8_t)int_to_hex(this->client_cid));  // connection ID
+#endif
 		if (len == 1){
 			if (buf[0] != '\r' && buf[0] != '\n'){ 
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+				Serial1.write(buf[0]);           // data to send
+#else
 				Serial.write(buf[0]);           // data to send
+#endif
 			} else if (buf[0] == '\n') {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+				Serial1.print("\n\r");           // new line
+#else
 				Serial.print("\n\r");           // new line
+#endif
 			} 
 		} else {
 				String buffer;
 				buffer = (const char *)buf;
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+				Serial1.print(buffer);
+#else
 				Serial.print(buffer);
+#endif
 		}
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+		Serial1.write((uint8_t)0x1b);    // data end
+		Serial1.write((uint8_t)0x45);		
+#else
 		Serial.write((uint8_t)0x1b);    // data end
 		Serial.write((uint8_t)0x45);		
+#endif
 	}
 	delay(10);
 
@@ -518,14 +605,23 @@ void GSClass::process()
     char inByte;
     uint8_t processDone = 0;
 
-    if (!Serial.available())
-        return;
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+    if (!Serial1.available())
+#else
+	if (!Serial.available())
+#endif
+		return;
 
     while (!processDone) {
         if (dev_mode == DEV_OP_MODE_COMMAND) {
             while (1) {
-                if (Serial.available()) {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+                if (Serial1.available()) {
+                    inByte = Serial1.read();
+#else
+				if (Serial.available()) {
                     inByte = Serial.read();
+#endif
 
                     if (inByte == 0x1b) {
                         // escape seq
@@ -556,16 +652,26 @@ void GSClass::process()
             /* data mode */
             while(1) {
 				//digitalWrite(5, LOW);
-                if (Serial.available()) {
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+                if (Serial1.available()) {
+                    inByte = Serial1.read();
+#else
+				if (Serial.available()) {
                     inByte = Serial.read();
+#endif
 
                     if (inByte == 0x53) {
                         /* data start, switch to data RX mode */
                         dev_mode = DEV_OP_MODE_DATA_RX;
                         /* read in CID */
                         while(1) {
-                            if (Serial.available()) {
-                                inByte = Serial.read();
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+							if (Serial1.available()) {
+								inByte = Serial1.read();
+#else
+							if (Serial.available()) {
+								inByte = Serial.read();
+#endif
 								
                                 break;
                             }
@@ -724,9 +830,15 @@ void GSClass::flush()
 	// clear the buffer
 	// since we need to clear the buffer, need to create this
 	// workaround
+#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+	while (Serial1.available())
+	{
+		Serial1.read();
+	}
+#else
 	while (Serial.available())
 	{
 		Serial.read();
 	}
+#endif
 }
-
