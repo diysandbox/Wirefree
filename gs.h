@@ -152,3 +152,4 @@ private:
 extern GSClass GS;
 
 #endif // _gs_h_
+

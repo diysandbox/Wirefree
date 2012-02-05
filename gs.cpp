@@ -87,7 +87,7 @@ char int_to_hex(uint8_t c)
 
 uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
 {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 	Serial1.begin(9600);		// so use Serial1 (pins 18 & 19)
 #else
 	Serial.begin(9600);
@@ -95,7 +95,7 @@ uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
 	delay(1000);
 
 	flush();
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 	Serial1.println();
 #else
 	Serial.println();
@@ -142,7 +142,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_WIRELESS_MODE:
 	case CMD_ENABLE_DHCPSVR:
 	{
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.println(cmd_tbl[cmd].cmd_str);
 #else
 		Serial.println(cmd_tbl[cmd].cmd_str);
@@ -152,7 +152,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_SET_WPA_PSK:
 	{
 		String cmd_buf = cmd_tbl[cmd].cmd_str + this->security_key;
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.println(cmd_buf);
 #else
 		Serial.println(cmd_buf);
@@ -166,17 +166,17 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid;
 		else if (mode == 2)
 			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid + ",,11";
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.println(cmd_buf);
 #else
 		Serial.println(cmd_buf);
-#endif
+#endif		
 		break;
 	}
 	case CMD_TCP_CONN:
 	{
 		String cmd_buf = cmd_tbl[cmd].cmd_str + this->ip + "," + this->port;
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.println(cmd_buf);
 #else
 		Serial.println(cmd_buf);
@@ -191,7 +191,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		cmd_buf += this->subnet;
 		cmd_buf += ",";
 		cmd_buf += this->gateway;
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.println(cmd_buf);
 #else
 		Serial.println(cmd_buf);
@@ -201,7 +201,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_DNS_LOOKUP:
 	{
 		String cmd_buf = cmd_tbl[cmd].cmd_str + this->dns_url_ip;
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.println(cmd_buf);
 #else
 		Serial.println(cmd_buf);
@@ -212,7 +212,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	{
 		if (this->sock_table[socket_num].status != SOCK_STATUS::CLOSED) {
 			String cmd_buf = cmd_tbl[cmd].cmd_str + String((unsigned int)this->sock_table[socket_num].cid);
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.println(cmd_buf);
 #else
 		Serial.println(cmd_buf);
@@ -452,7 +452,7 @@ String GSClass::readline(void)
 
 	while (!endDetected)
 	{
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		if (Serial1.available())
 #else
 		if (Serial.available())
@@ -462,7 +462,7 @@ String GSClass::readline(void)
 			// if so, throw away
 			// if strBuf length greater than 0, then this is a true end of line,
 			// so break out
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 			inByte = Serial1.read();
 #else
 			inByte = Serial.read();
@@ -492,7 +492,7 @@ uint16_t GSClass::readData(SOCKET s, uint8_t* buf, uint16_t len)
     uint8_t tmp1, tmp2;
 
     if (dev_mode == DEV_OP_MODE_DATA_RX) {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
     if (!Serial1.available())
 #else
     if (!Serial.available())
@@ -500,7 +500,7 @@ uint16_t GSClass::readData(SOCKET s, uint8_t* buf, uint16_t len)
         return 0;
 
     while(dataLen < len) {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
         if (Serial1.available()) {
             tmp1 = Serial1.read();
 #else
@@ -512,7 +512,7 @@ uint16_t GSClass::readData(SOCKET s, uint8_t* buf, uint16_t len)
 
                 /* read in escape sequence */
                 while(1) {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
                     if (Serial1.available()) {
                         tmp2 = Serial1.read();
 #else
@@ -555,7 +555,7 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 {	
 	if ((len == 0) || (buf[0] == '\r')){
 	} else {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.write((uint8_t)0x1b);    // data start
 		Serial1.write((uint8_t)0x53);
 		Serial1.write((uint8_t)int_to_hex(this->client_cid));  // connection ID
@@ -566,13 +566,13 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 #endif
 		if (len == 1){
 			if (buf[0] != '\r' && buf[0] != '\n'){ 
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 				Serial1.write(buf[0]);           // data to send
 #else
 				Serial.write(buf[0]);           // data to send
 #endif
 			} else if (buf[0] == '\n') {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 				Serial1.print("\n\r");           // new line
 #else
 				Serial.print("\n\r");           // new line
@@ -581,13 +581,13 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 		} else {
 				String buffer;
 				buffer = (const char *)buf;
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 				Serial1.print(buffer);
 #else
 				Serial.print(buffer);
 #endif
 		}
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 		Serial1.write((uint8_t)0x1b);    // data end
 		Serial1.write((uint8_t)0x45);		
 #else
@@ -606,7 +606,7 @@ void GSClass::process()
     char inByte;
     uint8_t processDone = 0;
 
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
     if (!Serial1.available())
 #else
 	if (!Serial.available())
@@ -616,7 +616,7 @@ void GSClass::process()
     while (!processDone) {
         if (dev_mode == DEV_OP_MODE_COMMAND) {
             while (1) {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
                 if (Serial1.available()) {
                     inByte = Serial1.read();
 #else
@@ -653,7 +653,7 @@ void GSClass::process()
             /* data mode */
             while(1) {
 				//digitalWrite(5, LOW);
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
                 if (Serial1.available()) {
                     inByte = Serial1.read();
 #else
@@ -666,7 +666,7 @@ void GSClass::process()
                         dev_mode = DEV_OP_MODE_DATA_RX;
                         /* read in CID */
                         while(1) {
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 							if (Serial1.available()) {
 								inByte = Serial1.read();
 #else
@@ -831,7 +831,7 @@ void GSClass::flush()
 	// clear the buffer
 	// since we need to clear the buffer, need to create this
 	// workaround
-#ifdef __PIC32MX795F512L__		// it's a chipKIT Max32
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
 	while (Serial1.available())
 	{
 		Serial1.read();

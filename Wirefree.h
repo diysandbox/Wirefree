@@ -80,3 +80,4 @@ public:
 extern Wirefree Wireless;
 
 #endif // _wirefree_h_
+

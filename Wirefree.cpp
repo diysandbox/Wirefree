@@ -78,13 +78,33 @@ void Wirefree::setLED(int color)
 
 void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data))
 {
+#if defined(__32MX795F512L__)		// it's a chipKIT Max32
+#ifndef debugSerial
+	Serial.begin(115200);
+#define debugSerial
+	Serial.println("Degug Serial started");
+#endif
+	Serial.println("Wirefree.cpp - begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data))");
+	Serial.println("                  call begin(w_prof, rxDataHndlr, NORMAL_MODE);");
+#endif
 	begin(w_prof, rxDataHndlr, NORMAL_MODE);
 }
 
 void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode)
 {
+#if defined(__32MX795F512L__)
+#ifndef debugSerial
+	Serial.begin(115200);
+#define debugSerial
+	Serial.println("Degug Serial started");
+#endif
+	Serial.println("Wirefree.cpp - begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode)");
+#endif
 	// setup LEDs
 	initLED();
+#if defined(__32MX795F512L__)
+	Serial.println("      initLED done");
+#endif
 
 	GS.mode = mode;
 	
@@ -93,14 +113,26 @@ void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uin
 		setLED(LED_RED);
 		return;
 	}
+#if defined(__32MX795F512L__)
+	Serial.println("      initialize device done");
+#endif
 
 	// configure params
 	GS.configure((GS_PROFILE*)w_prof);
+#if defined(__32MX795F512L__)
+	Serial.println("      configure params done");
+#endif
 
 	// initiate wireless connection
 	while (!GS.connect());
+#if defined(__32MX795F512L__)
+	Serial.println("      connect done");
+#endif
 	
 	setLED(LED_GREEN);
+#if defined(__32MX795F512L__)
+	Serial.println("Wirefree.cpp - END begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode)");
+#endif
 }
 
 void Wirefree::process()
@@ -145,4 +177,5 @@ void Wirefree::sendResponse(String data)
 }
 
 Wirefree Wireless;
+
 
