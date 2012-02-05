@@ -11,5 +11,12 @@ chipKIT code works with the LED demo, but does occasionally
 lock up after re-programming. Haven't found cause, but 
 disconnect USB and reconnect and seems to work reliably then. 
 
+Hoping someone with the Arduino setup can test and advise.
+
 Remember, it's still experimental!!!
+
+Started looking at how to speed up the Serial interface to
+115200 to allow for faster wireless comms (make use of the
+G mode).
+
 

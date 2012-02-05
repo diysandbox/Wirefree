@@ -133,6 +133,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	flush();
 
 	switch(cmd) {
+	case CMD_SET_UART_115200:
 	case CMD_DISABLE_ECHO:
 	case CMD_DISABLE_DHCP:
 	case CMD_DISCONNECT:
@@ -239,6 +240,7 @@ uint8_t GSClass::parse_resp(uint8_t cmd)
 		buf = readline();
 
 		switch(cmd) {
+		case CMD_SET_UART_115200:
 		case CMD_DISABLE_ECHO:
 		case CMD_DISABLE_DHCP:
 		case CMD_DISCONNECT:

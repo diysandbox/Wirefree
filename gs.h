@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef	_gs_h_
 #define	_gs_h_
 
-#ifdef __PIC32MX__
+#ifdef __PIC32MX__		// it's probably a chipKIT board so...
 #include <stdint.h>
 #else
 #include <avr/pgmspace.h>
@@ -49,6 +49,7 @@ public:
 // command identifiers
 // config
 #define CMD_DISABLE_ECHO 0
+#define CMD_SET_UART_115200 14
 // wifi
 #define CMD_SET_WPA_PSK  1
 #define CMD_SET_SSID     2
