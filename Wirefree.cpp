@@ -178,4 +178,3 @@ void Wirefree::sendResponse(String data)
 
 Wirefree Wireless;
 
-

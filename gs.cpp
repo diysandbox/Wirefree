@@ -843,3 +843,4 @@ void GSClass::flush()
 	}
 #endif
 }
+
