@@ -1,3 +1,5 @@
 This library is used to control DIYSandbox Arduino-based WiFi products on both Arduino and chipKIT Uno32 and chipKIT Max32 (Max32 uses Serial1).  This version is experimental.
 Current status:
-Using serial output via Serial0 to identify where the code stops when using the Max32. Have not done any testing on the Arduino as yet. chipKIT not working yet either.
+Using serial output via Serial0 to identify where the code stops when using the Max32. Have not done any testing on the Arduino as yet.
+chipKIT code works with the LED demo, but does occasionally lock up after re-programming. Haven't found cause, but disconnect USB and reconnect and seems to work reliably then. Remember, it's still experimental!!!
+
