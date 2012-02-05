@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef _wirefree_h_
 #define _wirefree_h_
-#ifdef __PIC32MX__
+#ifdef __PIC32MX__			// It's a chipKIT (probably) so...
 #include <stdint.h>
 #else
 #include <avr/pgmspace.h>
