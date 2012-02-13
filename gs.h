@@ -3,6 +3,8 @@ gs.cpp - HAL driver to talk with Gainspan GS1011 WiFi module
 
 Copyright (C) 2011 DIYSandbox LLC
 
+Porting for chipKIT boards Copyright (c) 2012 http://electronics.trev.id.au
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
@@ -21,7 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef	_gs_h_
 #define	_gs_h_
 
+#ifdef __PIC32MX__		// it's probably a chipKIT board so...
+#include <stdint.h>
+#else
 #include <avr/pgmspace.h>
+#endif
 #include <WString.h>
 
 typedef uint8_t SOCKET;
@@ -43,6 +49,7 @@ public:
 // command identifiers
 // config
 #define CMD_DISABLE_ECHO 0
+#define CMD_SET_UART_115200 14
 // wifi
 #define CMD_SET_WPA_PSK  1
 #define CMD_SET_SSID     2
@@ -146,4 +153,3 @@ private:
 extern GSClass GS;
 
 #endif // _gs_h_
-

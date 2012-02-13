@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+// Set to 0 to disable all Debug output
+#define WirefreeDebug 0
+
 #include "Wirefree.h"
 #include "gs.h"
 #include "global.h"
@@ -48,6 +51,16 @@ void Wirefree::initLED()
 
 void Wirefree::setLED(int color)
 {
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+#ifndef debugSerial
+	Serial.begin(115200);
+#define debugSerial
+	Serial.println("Degug Serial started");
+#endif
+	Serial.println("Wirefree.cpp - setLED(int color);");
+	Serial.print("     color = ");
+	Serial.println(color);
+#endif
 	// Clear LED
 	digitalWrite(3, HIGH);
 	digitalWrite(5, HIGH);
@@ -74,17 +87,43 @@ void Wirefree::setLED(int color)
         	digitalWrite(3, LOW);           
 	} else {
 	}	
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+	Serial.println("Wirefree.cpp - setLED(int color); - DONE");
+#endif
 }
 
 void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data))
 {
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+#ifndef debugSerial
+	Serial.begin(115200);
+#define debugSerial
+	Serial.println("Degug Serial started");
+#endif
+	Serial.println("Wirefree.cpp - begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data))");
+	Serial.println("                  call begin(w_prof, rxDataHndlr, NORMAL_MODE);");
+#endif
 	begin(w_prof, rxDataHndlr, NORMAL_MODE);
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+	Serial.println("Wirefree.cpp - begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data)) - DONE");
+#endif
 }
 
 void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode)
 {
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+#ifndef debugSerial
+	Serial.begin(115200);
+#define debugSerial
+	Serial.println("Degug Serial started");
+#endif
+	Serial.println("Wirefree.cpp - begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode)");
+#endif
 	// setup LEDs
 	initLED();
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+	Serial.println("      initLED done");
+#endif
 
 	GS.mode = mode;
 	
@@ -93,14 +132,26 @@ void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uin
 		setLED(LED_RED);
 		return;
 	}
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+	Serial.println("      initialize device done");
+#endif
 
 	// configure params
 	GS.configure((GS_PROFILE*)w_prof);
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+	Serial.println("      configure params done");
+#endif
 
 	// initiate wireless connection
 	while (!GS.connect());
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+	Serial.println("      connect done");
+#endif
 	
 	setLED(LED_GREEN);
+#if defined(__32MX795F512L__) && (WirefreeDebug > 0)
+	Serial.println("Wirefree.cpp - begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode) - DONE");
+#endif
 }
 
 void Wirefree::process()
@@ -145,4 +196,3 @@ void Wirefree::sendResponse(String data)
 }
 
 Wirefree Wireless;
-

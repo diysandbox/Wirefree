@@ -3,6 +3,8 @@ Wirefree.h - interface class to talk with DIYSandbox Arduino devices
 
 Copyright (C) 2011 DIYSandbox LLC
 
+Porting for chipKIT boards Copyright (c) 2012 http://electronics.trev.id.au
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
@@ -20,8 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef _wirefree_h_
 #define _wirefree_h_
-
+#ifdef __PIC32MX__			// It's a chipKIT (probably) so...
+#include <stdint.h>
+#else
 #include <avr/pgmspace.h>
+#endif
 #include <WString.h>
 
 #include "WifiClient.h"
@@ -75,4 +80,3 @@ public:
 extern Wirefree Wireless;
 
 #endif // _wirefree_h_
-
