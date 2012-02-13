@@ -15,8 +15,6 @@ Hoping someone with the Arduino setup can test and advise.
 
 Remember, it's still experimental!!!
 
-Started looking at how to speed up the Serial interface to
-115200 to allow for faster wireless comms (make use of the
-G mode).
+
 
 
