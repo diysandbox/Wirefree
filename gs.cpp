@@ -27,24 +27,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 GSClass GS;
 
-struct _cmd_tbl {
-	String cmd_str;
-} cmd_tbl[] = {
-		{"ATE0"},
-		{"AT+WWPA="},
-		{"AT+WA="},
-		{"AT+NDHCP=0"},
-		{"AT+NDHCP=1"},
-		{"AT+WD"},
-		{"AT+NSTCP=80"},
-		{"AT+NCTCP="},
-		{"AT+NMAC=?"},
-		{"AT+DNSLOOKUP="},
-		{"AT+NCLOSE="},
-		{"AT+NSET="},
-		{"AT+WM=2"},
-		{"AT+DHCPSRVR=1"},
+/*
+ * Command table definitions
+ */
+prog_char cmd_0[] PROGMEM = "ATE0";
+prog_char cmd_1[] PROGMEM = "AT+WWPA=";
+prog_char cmd_2[] PROGMEM = "AT+WA=";
+prog_char cmd_3[] PROGMEM = "AT+NDHCP=0";
+prog_char cmd_4[] PROGMEM = "AT+NDHCP=1";
+prog_char cmd_5[] PROGMEM = "AT+WD";
+prog_char cmd_6[] PROGMEM = "AT+NSTCP=80";
+prog_char cmd_7[] PROGMEM = "AT+NCTCP=";
+prog_char cmd_8[] PROGMEM = "AT+NMAC=?";
+prog_char cmd_9[] PROGMEM = "AT+DNSLOOKUP=";
+prog_char cmd_10[] PROGMEM = "AT+NCLOSE=";
+prog_char cmd_11[] PROGMEM = "AT+NSET=";
+prog_char cmd_12[] PROGMEM = "AT+WM=2";
+prog_char cmd_13[] PROGMEM = "AT+DHCPSRVR=1";
+
+PROGMEM const char *cmd_tbl[] =
+{
+		cmd_0, cmd_1, cmd_2, cmd_3, cmd_4, cmd_5, cmd_6, cmd_7,
+		cmd_8, cmd_9, cmd_10, cmd_11, cmd_12, cmd_13,
 };
+
+/* Make sure the cmd_buffer is large enough to hold
+ * the largest command in the above table */
+char cmd_buffer[16];
+
 
 uint8_t hex_to_int(char c)
 {
@@ -116,6 +126,10 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 {
 	flush();
 
+	memset(cmd_buffer, 16, 0);
+	strcpy_P(cmd_buffer, (char*)pgm_read_word(&(cmd_tbl[cmd])));
+	String cmd_str = String(cmd_buffer);
+
 	switch(cmd) {
 	case CMD_DISABLE_ECHO:
 	case CMD_DISABLE_DHCP:
@@ -126,12 +140,12 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_WIRELESS_MODE:
 	case CMD_ENABLE_DHCPSVR:
 	{
-		Serial.println(cmd_tbl[cmd].cmd_str);
+		Serial.println(cmd_str);
 		break;
 	}
 	case CMD_SET_WPA_PSK:
 	{
-		String cmd_buf = cmd_tbl[cmd].cmd_str + this->security_key;
+		String cmd_buf = cmd_str + this->security_key;
 		Serial.println(cmd_buf);
 		break;
 	}
@@ -139,22 +153,22 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	{
 		String cmd_buf;
 		if (mode == 0)
-			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid;
+			cmd_buf = cmd_str + this->ssid;
 		else if (mode == 2)
-			cmd_buf = cmd_tbl[cmd].cmd_str + this->ssid + ",,11";
+			cmd_buf = cmd_str + this->ssid + ",,11";
 		Serial.println(cmd_buf);
 		break;
 	}
 	case CMD_TCP_CONN:
 	{
-		String cmd_buf = cmd_tbl[cmd].cmd_str + this->ip + "," + this->port;
+		String cmd_buf = cmd_str + this->ip + "," + this->port;
 		Serial.println(cmd_buf);
 		break;
 	}
 	case CMD_NETWORK_SET:
 	{
 		//String cmd_buf = cmd_tbl[cmd].cmd_str + this->local_ip + "," + this->subnet + "," + this->gateway;
-		String cmd_buf = cmd_tbl[cmd].cmd_str + this->local_ip;
+		String cmd_buf = cmd_str + this->local_ip;
 		cmd_buf +=  ",";
 		cmd_buf += this->subnet;
 		cmd_buf += ",";
@@ -164,14 +178,14 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	}
 	case CMD_DNS_LOOKUP:
 	{
-		String cmd_buf = cmd_tbl[cmd].cmd_str + this->dns_url_ip;
+		String cmd_buf = cmd_str + this->dns_url_ip;
 		Serial.println(cmd_buf);
 		break;
 	}
 	case CMD_CLOSE_CONN:
 	{
 		if (this->sock_table[socket_num].status != SOCK_STATUS::CLOSED) {
-			String cmd_buf = cmd_tbl[cmd].cmd_str + String((unsigned int)this->sock_table[socket_num].cid);
+			String cmd_buf = cmd_str + String((unsigned int)this->sock_table[socket_num].cid);
 			Serial.println(cmd_buf);
 		} else {
 			return 0;
