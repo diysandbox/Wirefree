@@ -36,7 +36,7 @@ prog_char cmd_2[] PROGMEM = "AT+WA=";
 prog_char cmd_3[] PROGMEM = "AT+NDHCP=0";
 prog_char cmd_4[] PROGMEM = "AT+NDHCP=1";
 prog_char cmd_5[] PROGMEM = "AT+WD";
-prog_char cmd_6[] PROGMEM = "AT+NSTCP=80";
+prog_char cmd_6[] PROGMEM = "AT+NSTCP=";
 prog_char cmd_7[] PROGMEM = "AT+NCTCP=";
 prog_char cmd_8[] PROGMEM = "AT+NMAC=?";
 prog_char cmd_9[] PROGMEM = "AT+DNSLOOKUP=";
@@ -135,7 +135,6 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_DISABLE_DHCP:
 	case CMD_DISCONNECT:
 	case CMD_ENABLE_DHCP:
-	case CMD_LISTEN:
 	case CMD_GET_MAC_ADDR:
 	case CMD_WIRELESS_MODE:
 	case CMD_ENABLE_DHCPSVR:
@@ -190,6 +189,12 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		} else {
 			return 0;
 		}
+		break;
+	}
+	case CMD_LISTEN:
+	{
+		String cmd_buf = cmd_str + String((unsigned int)this->sock_table[socket_num].port);
+		Serial.println(cmd_buf);
 		break;
 	}
 	default:
