@@ -44,11 +44,13 @@ prog_char cmd_10[] PROGMEM = "AT+NCLOSE=";
 prog_char cmd_11[] PROGMEM = "AT+NSET=";
 prog_char cmd_12[] PROGMEM = "AT+WM=2";
 prog_char cmd_13[] PROGMEM = "AT+DHCPSRVR=1";
+prog_char cmd_14[] PROGMEM = "AT+NSUDP=";
+prog_char cmd_15[] PROGMEM = "AT+NCUDP=";
 
 PROGMEM const char *cmd_tbl[] =
 {
 		cmd_0, cmd_1, cmd_2, cmd_3, cmd_4, cmd_5, cmd_6, cmd_7,
-		cmd_8, cmd_9, cmd_10, cmd_11, cmd_12, cmd_13,
+		cmd_8, cmd_9, cmd_10, cmd_11, cmd_12, cmd_13, cmd_14, cmd_15,
 };
 
 /* Make sure the cmd_buffer is large enough to hold
@@ -87,7 +89,7 @@ char int_to_hex(uint8_t c)
 	return val;
 }
 
-uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
+uint8_t GSClass::init()
 {
 	Serial.begin(9600);
 	delay(1000);
@@ -99,8 +101,6 @@ uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
 	dev_mode = DEV_OP_MODE_COMMAND;
 	connection_state = DEV_CONN_ST_DISCONNECTED;
 	dataOnSock = 255;
-
-	this->rx_data_handler = rx_data_hndlr;
 
 	for (int i = 0; i < 4; i++) {
 	    this->sock_table[i].cid = 0;
@@ -191,11 +191,17 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		}
 		break;
 	}
-	case CMD_LISTEN:
+	case CMD_TCP_LISTEN:
 	{
 		String cmd_buf = cmd_str + String((unsigned int)this->sock_table[socket_num].port);
 		Serial.println(cmd_buf);
 		break;
+	}
+	case CMD_UDP_LISTEN:
+	{
+	    String cmd_buf = cmd_str + String((unsigned int)this->sock_table[socket_num].port);
+	    Serial.println(cmd_buf);
+	    break;
 	}
 	default:
 		break;
@@ -235,7 +241,8 @@ uint8_t GSClass::parse_resp(uint8_t cmd)
 			}
 			break;
 		}
-		case CMD_LISTEN:
+		case CMD_TCP_LISTEN:
+		case CMD_UDP_LISTEN:
 		{
 			if (buf.startsWith("CONNECT")) {
 				/* got CONNECT */
@@ -729,6 +736,11 @@ void GSClass::execSocketCmd(SOCKET s, uint8_t cmd)
 uint8_t GSClass::readSocketStatus(SOCKET s)
 {
 	return this->sock_table[s].status;
+}
+
+uint8_t GSClass::getSocketProtocol(SOCKET s)
+{
+	return this->sock_table[s].protocol;
 }
 
 uint8_t GSClass::isDataOnSock(SOCKET s)

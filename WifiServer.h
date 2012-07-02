@@ -30,9 +30,10 @@ class WifiServer :
 public Print {
 private:
   uint16_t _port;
+  uint8_t protocol;
   void accept();
 public:
-  WifiServer(uint16_t);
+  WifiServer(uint16_t, uint8_t);
   WifiClient available();
   void begin();
   virtual ARETTYPE write(uint8_t);

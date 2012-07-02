@@ -76,12 +76,12 @@ void Wirefree::setLED(int color)
 	}	
 }
 
-void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data))
+void Wirefree::begin(WIFI_PROFILE* w_prof)
 {
-	begin(w_prof, rxDataHndlr, NORMAL_MODE);
+	begin(w_prof, NORMAL_MODE);
 }
 
-void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uint8_t mode)
+void Wirefree::begin(WIFI_PROFILE* w_prof, uint8_t mode)
 {
 	// setup LEDs
 	initLED();
@@ -89,7 +89,7 @@ void Wirefree::begin(WIFI_PROFILE* w_prof, void (*rxDataHndlr)(String data), uin
 	GS.mode = mode;
 	
 	// initialize device
-	if (!GS.init(rxDataHndlr)) {
+	if (!GS.init()) {
 		setLED(LED_RED);
 		return;
 	}
@@ -123,25 +123,6 @@ uint8_t Wirefree::socketOpen(String url, String port)
 	}
 
 	return 1;
-}
-
-uint8_t Wirefree::connected()
-{
-	return GS.connected();
-}
-
-void Wirefree::sendDeviceID()
-{
-	String dev_id_str = "ID:" + GS.get_dev_id();
-
-	GS.send_data(dev_id_str);
-}
-
-void Wirefree::sendResponse(String data)
-{
-	String resp_str = "TIME:" + data + ":" + String(millis());
-
-	GS.send_data(resp_str);
 }
 
 Wirefree Wireless;
