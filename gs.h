@@ -134,6 +134,8 @@ private:
 	SOCK_TABLE sock_table[4];
 	uint8_t socket_num;
 	SOCKET dataOnSock;
+	String srcIPUDP;
+	String srcPortUDP;
 
 	void (*rx_data_handler)(String data);
 

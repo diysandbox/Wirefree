@@ -586,7 +586,7 @@ void GSClass::process()
                     inByte = Serial.read();
 
                     if (inByte == 0x53) {
-                        /* data start, switch to data RX mode */
+                        /* TCP data start, switch to data RX mode */
                         dev_mode = DEV_OP_MODE_DATA_RX;
                         /* read in CID */
                         while(1) {
@@ -604,6 +604,58 @@ void GSClass::process()
 								break;
                             }
                         }
+
+                        break;
+                    } else if (inByte == 0x75) {
+                        /* UDP data start, switch to data RX mode */
+                        dev_mode = DEV_OP_MODE_DATA_RX;
+                        /* read in CID */
+                        while(1) {
+                            if (Serial.available()) {
+                                inByte = Serial.read();
+                                break;
+                            }
+                        }
+
+                        // find socket from CID
+                        for (SOCKET new_sock = 0; new_sock < 4; new_sock++) {
+                            if (this->sock_table[new_sock].cid == hex_to_int(inByte)) {
+                                dataOnSock = new_sock;
+                                break;
+                            }
+                        }
+
+                        /* read in source IP address */
+                        String srcIP;
+                        while(1) {
+                            if (Serial.available()) {
+                                inByte = Serial.read();
+
+                                if (inByte == ' ') {
+                                    /* space */
+                                    break;
+                                } else {
+                                    srcIP += inByte;
+                                }
+                            }
+                        }
+                        srcIPUDP = srcIP;
+
+                        /* read in source port number */
+                        String srcPort;
+                        while(1) {
+                            if (Serial.available()) {
+                                inByte = Serial.read();
+
+                                if (inByte == 0x9) {
+                                    /* horizontal tab */
+                                    break;
+                                } else {
+                                    srcPort += inByte;
+                                }
+                            }
+                        }
+                        srcPortUDP = srcPort;
 
                         break;
                     } else if (inByte == 0x45) {

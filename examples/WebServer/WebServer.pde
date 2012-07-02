@@ -92,5 +92,3 @@ void loop()
     client.stop();            
   }
 }
-
-
