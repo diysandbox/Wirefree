@@ -28,7 +28,7 @@ WIFI_PROFILE wireless_prof = {
                  /* subnet mask */ "255.255.255.0",
                   /* Gateway IP */ "192.168.1.1", };
 
-WifiServer server(80, PROTO_UDP);
+WifiServer server(12344, PROTO_UDP);
 
 void setup()
 {
@@ -43,20 +43,38 @@ void loop()
 {
   // Listen for incoming clients
   WifiClient client = server.available();
+
+  char msgNum = 1;
+
   if (client) {
     while (client.connected()) {
-      if (client.available()) {
-        int  b;
+      String msg;
 
-        while((b = client.read()) == -1);
-      } else {
-          break;
+      while (client.available()) {
+          char in;
+
+          while ((in = client.read()) == -1);
+
+          msg += in;
+          if (in == '\n') {
+            break;
+          }
+      }
+
+      switch (msgNum) {
+      case 1:
+        Serial.print(msg);
+        client.print("Hello from Hydrogen!! What is your name? ");
+        msgNum++;
+        break;
+      case 2:
+        client.print("Hello ");
+        client.println(msg);
+        msgNum = 1;
+        break;
       }
     }
 
     delay(1);
-
-    // close the connection
-    client.stop();
   }
 }
