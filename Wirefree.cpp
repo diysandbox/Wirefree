@@ -110,6 +110,7 @@ void Wirefree::process()
 
 uint8_t Wirefree::socketOpen(String url, String port)
 {
+#if 0
 	String ip;
 
 	// get IP address from URL
@@ -121,7 +122,7 @@ uint8_t Wirefree::socketOpen(String url, String port)
 	if (!GS.connect_socket("192.168.0.100", "32000")) {
 		return 0;
 	}
-
+#endif
 	return 1;
 }
 

@@ -118,7 +118,7 @@ uint8_t connect(SOCKET s, String addr, uint16_t port)
 {
 	String ip;
 	
-	ip = addr;
+	ip = addr;  // FIXME : why local variable?
 	if 
 		(
 		 ((addr[0] == 0xFF) && (addr[1] == 0xFF) && (addr[2] == 0xFF) && (addr[3] == 0xFF)) ||
@@ -128,5 +128,5 @@ uint8_t connect(SOCKET s, String addr, uint16_t port)
 		return 0;
 	
 	// set destination IP
-	return GS.connect_socket(ip, (String)port);	
+	return GS.connectSocket(s, ip, (String)port);
 }

@@ -62,6 +62,8 @@ public:
 #define CMD_UDP_LISTEN   14
 #define CMD_UDP_CONN     15
 
+#define CMD_INVALID      255
+
 // device operation modes
 #define DEV_OP_MODE_COMMAND 0
 #define DEV_OP_MODE_DATA    1
@@ -98,7 +100,7 @@ public:
 	uint8_t connect();
 	uint8_t connected();
 	void process();
-	uint8_t connect_socket(String ip, String port);
+	uint8_t connectSocket(SOCKET s, String ip, String port);
 	String dns_lookup(String url);
 	void send_data(String data);
 	void esc_seq_start();

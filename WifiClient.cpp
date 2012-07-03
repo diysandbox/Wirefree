@@ -30,7 +30,7 @@ uint16_t WifiClient::_srcport = 1024;
 WifiClient::WifiClient(uint8_t sock) : _sock(sock) {
 }
 
-WifiClient::WifiClient(String ip, uint16_t port) : _ip(ip), _port(port), _sock(MAX_SOCK_NUM) {
+WifiClient::WifiClient(String ip, uint16_t port, uint8_t proto) : _ip(ip), _port(port), _protocol(proto), _sock(MAX_SOCK_NUM) {
 }
 
 
@@ -51,7 +51,12 @@ uint8_t WifiClient::connect() {
 	
 	_srcport++;
 	if (_srcport == 0) _srcport = 1024;
-	socket(_sock, IPPROTO::TCP, _srcport, 0);
+
+	if (_protocol == PROTO_TCP) {
+	    socket(_sock, IPPROTO::TCP, _srcport, 0);
+	} else if (_protocol == PROTO_UDP) {
+	    socket(_sock, IPPROTO::UDP, _srcport, 0);
+	}
 	
 	if (!::connect(_sock, _ip, _port)) {
 		_sock = MAX_SOCK_NUM;

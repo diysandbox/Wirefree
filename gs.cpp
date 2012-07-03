@@ -783,12 +783,21 @@ void GSClass::parse_data(String buf)
 	this->rx_data_handler(buf);
 }
 
-uint8_t GSClass::connect_socket(String ip, String port)
+uint8_t GSClass::connectSocket(SOCKET s, String ip, String port)
 {
+    uint8_t cmd = CMD_INVALID;
+
 	this->ip = ip;
 	this->port = port;
+	this->socket_num = s;
 
-	if (!send_cmd_w_resp(CMD_TCP_CONN)) {
+	if (this->sock_table[s].protocol == IPPROTO::TCP) {
+	    cmd = CMD_TCP_CONN;
+	} else if (this->sock_table[s].protocol == IPPROTO::UDP) {
+	    cmd = CMD_UDP_CONN;
+	}
+
+	if (!send_cmd_w_resp(cmd)) {
 		return 0;
 	}
 
