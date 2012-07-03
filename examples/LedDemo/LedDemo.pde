@@ -21,24 +21,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <Wirefree.h>
 #include <WifiServer.h>
 
-WIFI_PROFILE w_prof = { "Cisco32371",       /* SSID */
-                        "12345678" ,        /* WPA/WPA2 passphrase */
-                        "192.168.1.109" ,   /* IP address */
-                        "255.255.255.0" ,   /* subnet mask */
-                        "192.168.1.1"   ,   /* Gateway IP */
-                      };
+WIFI_PROFILE wireless_prof = {
+                        /* SSID */ "diysandbox",
+         /* WPA/WPA2 passphrase */ "12345678",
+                  /* IP address */ "192.168.1.109",
+                 /* subnet mask */ "255.255.255.0",
+                  /* Gateway IP */ "192.168.1.1", };
                               
 // port 80 is default for HTTP
-WifiServer server(80);
-
-void parseRxData(String data)
-{
-}
+WifiServer server(80, PROTO_TCP);
 
 void setup()
 {
   // connect to AP & start server
-  Wireless.begin(&w_prof, &parseRxData);
+  Wireless.begin(&wireless_prof);
   server.begin();
   
   delay(1000);

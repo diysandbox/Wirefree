@@ -23,12 +23,12 @@ This example code is in the public domain.
 #include <Wirefree.h>
 #include <WifiClient.h>
 
-WIFI_PROFILE w_prof = { "dd-wrt",       /* SSID */
-                        "12345678" ,        /* WPA/WPA2 passphrase */
-                        NULL,               /* Set for DHCP */
-                        NULL,
-                        NULL
-                      };
+WIFI_PROFILE wireless_prof = {
+                        /* SSID */ "diysandbox",
+         /* WPA/WPA2 passphrase */ "12345678",
+                  /* IP address */ NULL,
+                 /* subnet mask */ NULL,
+                  /* Gateway IP */ NULL, };
 
 String server = "192.168.1.7"; // Hydrogen WebServer
 
@@ -37,10 +37,6 @@ String server = "192.168.1.7"; // Hydrogen WebServer
 // that you want to connect to (port 80 is default for HTTP):
 WifiClient client(server, 80);
 
-void parseRxData(String data)
-{
-}
-
 // this constant won't change.  It's the pin number
 // of the sensor's output:
 const int pingPin = 7;
@@ -48,7 +44,7 @@ const int pingPin = 7;
 void setup()
 {
   // connect to AP & start server
-  Wireless.begin(&w_prof, &parseRxData);
+  Wireless.begin(&wireless_prof);
     
 //  delay(1000);
 }
