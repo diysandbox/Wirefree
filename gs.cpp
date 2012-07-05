@@ -44,11 +44,13 @@ prog_char cmd_10[] PROGMEM = "AT+NCLOSE=";
 prog_char cmd_11[] PROGMEM = "AT+NSET=";
 prog_char cmd_12[] PROGMEM = "AT+WM=2";
 prog_char cmd_13[] PROGMEM = "AT+DHCPSRVR=1";
+prog_char cmd_14[] PROGMEM = "AT+NSUDP=";
+prog_char cmd_15[] PROGMEM = "AT+NCUDP=";
 
 PROGMEM const char *cmd_tbl[] =
 {
 		cmd_0, cmd_1, cmd_2, cmd_3, cmd_4, cmd_5, cmd_6, cmd_7,
-		cmd_8, cmd_9, cmd_10, cmd_11, cmd_12, cmd_13,
+		cmd_8, cmd_9, cmd_10, cmd_11, cmd_12, cmd_13, cmd_14, cmd_15,
 };
 
 /* Make sure the cmd_buffer is large enough to hold
@@ -87,7 +89,7 @@ char int_to_hex(uint8_t c)
 	return val;
 }
 
-uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
+uint8_t GSClass::init()
 {
 	Serial.begin(9600);
 	delay(1000);
@@ -99,8 +101,6 @@ uint8_t GSClass::init(void (*rx_data_hndlr)(String data))
 	dev_mode = DEV_OP_MODE_COMMAND;
 	connection_state = DEV_CONN_ST_DISCONNECTED;
 	dataOnSock = 255;
-
-	this->rx_data_handler = rx_data_hndlr;
 
 	for (int i = 0; i < 4; i++) {
 	    this->sock_table[i].cid = 0;
@@ -159,6 +159,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		break;
 	}
 	case CMD_TCP_CONN:
+	case CMD_UDP_CONN:
 	{
 		String cmd_buf = cmd_str + this->ip + "," + this->port;
 		Serial.println(cmd_buf);
@@ -191,11 +192,17 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		}
 		break;
 	}
-	case CMD_LISTEN:
+	case CMD_TCP_LISTEN:
 	{
 		String cmd_buf = cmd_str + String((unsigned int)this->sock_table[socket_num].port);
 		Serial.println(cmd_buf);
 		break;
+	}
+	case CMD_UDP_LISTEN:
+	{
+	    String cmd_buf = cmd_str + String((unsigned int)this->sock_table[socket_num].port);
+	    Serial.println(cmd_buf);
+	    break;
 	}
 	default:
 		break;
@@ -235,7 +242,8 @@ uint8_t GSClass::parse_resp(uint8_t cmd)
 			}
 			break;
 		}
-		case CMD_LISTEN:
+		case CMD_TCP_LISTEN:
+		case CMD_UDP_LISTEN:
 		{
 			if (buf.startsWith("CONNECT")) {
 				/* got CONNECT */
@@ -243,6 +251,20 @@ uint8_t GSClass::parse_resp(uint8_t cmd)
 				this->sock_table[socket_num].cid = hex_to_int(buf[8]);
 				this->sock_table[socket_num].status = SOCK_STATUS::LISTEN;
 				
+				/* init a socket for UDP */
+				if (this->sock_table[socket_num].protocol == IPPROTO::UDP) {
+				    for (int new_sock = 0; new_sock < 4; new_sock++) {
+				        if (this->sock_table[new_sock].status == SOCK_STATUS::CLOSED) {
+				            this->sock_table[new_sock].cid = this->sock_table[socket_num].cid;
+				            this->sock_table[new_sock].port = this->sock_table[socket_num].port;
+				            this->sock_table[new_sock].protocol = this->sock_table[socket_num].protocol;
+				            this->sock_table[new_sock].status = SOCK_STATUS::ESTABLISHED;
+
+				            break;
+				        }
+				    }
+				}
+
 			} else if (buf == "OK") {
 				/* got OK */
 				ret = 1;
@@ -258,6 +280,7 @@ uint8_t GSClass::parse_resp(uint8_t cmd)
 			break;
 		}
 		case CMD_TCP_CONN:
+		case CMD_UDP_CONN:
 		{
 			if (buf.startsWith("CONNECT")) {
 				/* got CONNECT */
@@ -374,9 +397,11 @@ uint8_t GSClass::connect()
 	}
 
 	if (mode == 0) {
-		if (!send_cmd_w_resp(CMD_SET_WPA_PSK)) {
-			return 0;
-		}
+	    if (this->security_key != NULL) {
+		    if (!send_cmd_w_resp(CMD_SET_WPA_PSK)) {
+			    return 0;
+		    }
+	    }
 
 		if (!send_cmd_w_resp(CMD_SET_SSID)) {
 			return 0;
@@ -459,47 +484,47 @@ uint16_t GSClass::readData(SOCKET s, uint8_t* buf, uint16_t len)
     uint8_t tmp1, tmp2;
 
     if (dev_mode == DEV_OP_MODE_DATA_RX) {
-    if (!Serial.available())
-        return 0;
+        if (!Serial.available())
+            return 0;
 
-    while(dataLen < len) {
-        if (Serial.available()) {
-            tmp1 = Serial.read();
+        while(dataLen < len) {
+            if (Serial.available()) {
+                tmp1 = Serial.read();
 
-            if (tmp1 == 0x1b) {
-                // escape seq
+                if (tmp1 == 0x1b) {
+                    // escape seq
 
-                /* read in escape sequence */
-                while(1) {
-                    if (Serial.available()) {
-                        tmp2 = Serial.read();
+                    /* read in escape sequence */
+                    while(1) {
+                        if (Serial.available()) {
+                            tmp2 = Serial.read();
+                            break;
+                        }
+                    }
+
+                    if (tmp2 == 0x45) {
+                        /* data end, switch to command mode */
+                        dev_mode = DEV_OP_MODE_COMMAND;
+                        /* clear flag */
+                        dataOnSock = 255;
                         break;
-                    }
-                }
-				
-                if (tmp2 == 0x45) {
-                    /* data end, switch to command mode */
-                    dev_mode = DEV_OP_MODE_COMMAND;
-                    /* clear flag */
-                    dataOnSock = 255;
-                    break;
-                } else {
-                    if (dataLen < (len-2)) {
-                        buf[dataLen++] = tmp1;
-                        buf[dataLen++] = tmp2;
                     } else {
-                        buf[dataLen++] = tmp1;
+                        if (dataLen < (len-2)) {
+                            buf[dataLen++] = tmp1;
+                            buf[dataLen++] = tmp2;
+                        } else {
+                            buf[dataLen++] = tmp1;
 
-                        /* FIXME : throw away second byte ? */
+                            /* FIXME : throw away second byte ? */
+                        }
                     }
+                } else {
+                    // data
+                    buf[dataLen] = tmp1;
+                    dataLen++;
                 }
-            } else {
-                // data
-                buf[dataLen] = tmp1;
-                dataLen++;
             }
         }
-    }
     }
 
     return dataLen;
@@ -509,22 +534,46 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 {	
 	if ((len == 0) || (buf[0] == '\r')){
 	} else {
-		Serial.write((uint8_t)0x1b);    // data start
-		Serial.write((uint8_t)0x53);
-		Serial.write((uint8_t)int_to_hex(this->client_cid));  // connection ID
-		if (len == 1){
-			if (buf[0] != '\r' && buf[0] != '\n'){ 
-				Serial.write(buf[0]);           // data to send
-			} else if (buf[0] == '\n') {
-				Serial.print("\n\r");           // new line
-			} 
-		} else {
-				String buffer;
-				buffer = (const char *)buf;
-				Serial.print(buffer);
-		}
-		Serial.write((uint8_t)0x1b);    // data end
-		Serial.write((uint8_t)0x45);		
+	    if ((this->sock_table[s].protocol == IPPROTO::TCP) ||
+	            (this->sock_table[s].protocol == IPPROTO::UDP_CLIENT)) {
+	        Serial.write((uint8_t)0x1b);    // data start
+	        Serial.write((uint8_t)0x53);
+	        Serial.write((uint8_t)int_to_hex(this->client_cid));  // connection ID
+	        if (len == 1){
+	            if (buf[0] != '\r' && buf[0] != '\n'){
+	                Serial.write(buf[0]);           // data to send
+	            } else if (buf[0] == '\n') {
+	                Serial.print("\n\r");           // new line
+	            }
+	        } else {
+	            String buffer;
+	            buffer = (const char *)buf;
+	            Serial.print(buffer);
+	        }
+	        Serial.write((uint8_t)0x1b);    // data end
+	        Serial.write((uint8_t)0x45);
+	    } else if (this->sock_table[s].protocol == IPPROTO::UDP) {
+	        Serial.write((uint8_t)0x1b);    // data start
+	        Serial.write((uint8_t)0x55);
+	        Serial.write((uint8_t)int_to_hex(this->sock_table[s].cid));  // connection ID
+	        Serial.print(srcIPUDP);
+	        Serial.print(":");
+	        Serial.print(srcPortUDP);
+	        Serial.print(":");
+	        if (len == 1){
+	            if (buf[0] != '\r' && buf[0] != '\n'){
+	                Serial.write(buf[0]);           // data to send
+	            } else if (buf[0] == '\n') {
+	                Serial.print("\n\r");           // new line
+	            }
+	        } else {
+	            String buffer;
+	            buffer = (const char *)buf;
+	            Serial.print(buffer);
+	        }
+	        Serial.write((uint8_t)0x1b);    // data end
+	        Serial.write((uint8_t)0x45);
+	    }
 	}
 	delay(10);
 
@@ -579,7 +628,7 @@ void GSClass::process()
                     inByte = Serial.read();
 
                     if (inByte == 0x53) {
-                        /* data start, switch to data RX mode */
+                        /* TCP data start, switch to data RX mode */
                         dev_mode = DEV_OP_MODE_DATA_RX;
                         /* read in CID */
                         while(1) {
@@ -595,6 +644,58 @@ void GSClass::process()
                             if (this->sock_table[new_sock].cid == hex_to_int(inByte)) {
                                 dataOnSock = new_sock;
 								break;
+                            }
+                        }
+
+                        break;
+                    } else if (inByte == 0x75) {
+                        /* UDP data start, switch to data RX mode */
+                        dev_mode = DEV_OP_MODE_DATA_RX;
+                        /* read in CID */
+                        while(1) {
+                            if (Serial.available()) {
+                                inByte = Serial.read();
+                                break;
+                            }
+                        }
+
+                        // find socket from CID
+                        for (SOCKET new_sock = 0; new_sock < 4; new_sock++) {
+                            if (this->sock_table[new_sock].cid == hex_to_int(inByte)) {
+                                if (this->sock_table[new_sock].status == SOCK_STATUS::ESTABLISHED) {
+                                    dataOnSock = new_sock;
+                                    break;
+                                }
+                            }
+                        }
+
+                        /* read in source IP address */
+                        srcIPUDP = "";
+                        while(1) {
+                            if (Serial.available()) {
+                                inByte = Serial.read();
+
+                                if (inByte == 0x20) {
+                                    /* space */
+                                    break;
+                                } else {
+                                    srcIPUDP += inByte;
+                                }
+                            }
+                        }
+
+                        /* read in source port number */
+                        srcPortUDP = "";
+                        while(1) {
+                            if (Serial.available()) {
+                                inByte = Serial.read();
+
+                                if (inByte == 0x09) {
+                                    /* horizontal tab */
+                                    break;
+                                } else {
+                                    srcPortUDP += inByte;
+                                }
                             }
                         }
 
@@ -636,24 +737,26 @@ void GSClass::parse_cmd(String buf)
 	if (buf.startsWith("CONNECT")) {
 		/* got CONNECT */
 
-		if (serv_cid == hex_to_int(buf[8])) {
-			/* client connected */
-			client_cid = hex_to_int(buf[10]);
-		}
-
 		for (int sock = 0; sock < 4; sock++) {
 			if ((this->sock_table[sock].status == SOCK_STATUS::LISTEN) &&
 				(this->sock_table[sock].cid == hex_to_int(buf[8])))
 			{
-				for (int new_sock = 0; new_sock < 4; new_sock++) {
-					if (this->sock_table[new_sock].status == SOCK_STATUS::CLOSED) {
-						this->sock_table[new_sock].cid = hex_to_int(buf[10]);
-						this->sock_table[new_sock].port = this->sock_table[sock].port;
-						this->sock_table[new_sock].protocol = this->sock_table[sock].protocol;
-						this->sock_table[new_sock].status = SOCK_STATUS::ESTABLISHED;
-						break;
-					}
-				}
+			    if (this->sock_table[sock].protocol == IPPROTO::TCP) {
+			        if (serv_cid == hex_to_int(buf[8])) {
+			            /* client connected */
+			            client_cid = hex_to_int(buf[10]);
+			        }
+
+			        for (int new_sock = 0; new_sock < 4; new_sock++) {
+			            if (this->sock_table[new_sock].status == SOCK_STATUS::CLOSED) {
+			                this->sock_table[new_sock].cid = hex_to_int(buf[10]);
+			                this->sock_table[new_sock].port = this->sock_table[sock].port;
+			                this->sock_table[new_sock].protocol = this->sock_table[sock].protocol;
+			                this->sock_table[new_sock].status = SOCK_STATUS::ESTABLISHED;
+			                break;
+			            }
+			        }
+			    }
 			}
 		}
 
@@ -683,12 +786,21 @@ void GSClass::parse_data(String buf)
 	this->rx_data_handler(buf);
 }
 
-uint8_t GSClass::connect_socket(String ip, String port)
+uint8_t GSClass::connectSocket(SOCKET s, String ip, String port)
 {
+    uint8_t cmd = CMD_INVALID;
+
 	this->ip = ip;
 	this->port = port;
+	this->socket_num = s;
 
-	if (!send_cmd_w_resp(CMD_TCP_CONN)) {
+	if (this->sock_table[s].protocol == IPPROTO::TCP) {
+	    cmd = CMD_TCP_CONN;
+	} else if (this->sock_table[s].protocol == IPPROTO::UDP_CLIENT) {
+	    cmd = CMD_UDP_CONN;
+	}
+
+	if (!send_cmd_w_resp(cmd)) {
 		return 0;
 	}
 
@@ -729,6 +841,11 @@ void GSClass::execSocketCmd(SOCKET s, uint8_t cmd)
 uint8_t GSClass::readSocketStatus(SOCKET s)
 {
 	return this->sock_table[s].status;
+}
+
+uint8_t GSClass::getSocketProtocol(SOCKET s)
+{
+	return this->sock_table[s].protocol;
 }
 
 uint8_t GSClass::isDataOnSock(SOCKET s)

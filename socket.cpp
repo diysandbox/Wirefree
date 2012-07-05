@@ -29,9 +29,9 @@ static uint16_t local_port;
  */
 uint8_t socket(SOCKET s, uint8_t protocol, uint16_t port, uint8_t flag)
 {
-  uint8_t ret;
-  if ((protocol == IPPROTO::TCP))
-  {
+  //uint8_t ret;
+  //if ((protocol == IPPROTO::TCP))
+  //{
     close(s);
     if (port != 0) {
       GS.configSocket(s, protocol, port);
@@ -44,9 +44,9 @@ uint8_t socket(SOCKET s, uint8_t protocol, uint16_t port, uint8_t flag)
     //W5100.execCmdSn(s, Sock_OPEN);
     
     return 1;
-  }
+  //}
 
-  return 0;
+  //return 0;
 }
 
 
@@ -67,7 +67,11 @@ uint8_t listen(SOCKET s)
 {
   if (GS.readSocketStatus(s) != SOCK_STATUS::INIT)
     return 0;
-  GS.execSocketCmd(s, CMD_LISTEN);
+  if (GS.getSocketProtocol(s) == IPPROTO::TCP) {
+    GS.execSocketCmd(s, CMD_TCP_LISTEN);
+  } else if (GS.getSocketProtocol(s) == IPPROTO::UDP) {
+    GS.execSocketCmd(s, CMD_UDP_LISTEN);
+  }
   return 1;
 }
 
@@ -110,19 +114,19 @@ uint16_t send(SOCKET s, const uint8_t * buf, uint16_t len)
  * 		
  * @return	1 for success else 0.
  */
-uint8_t connect(SOCKET s, String addr, uint16_t port)
+uint8_t connect(SOCKET s, String addr, String port)
 {
 	String ip;
 	
-	ip = addr;
+	ip = addr;  // FIXME : why local variable?
 	if 
 		(
 		 ((addr[0] == 0xFF) && (addr[1] == 0xFF) && (addr[2] == 0xFF) && (addr[3] == 0xFF)) ||
-		 ((addr[0] == 0x00) && (addr[1] == 0x00) && (addr[2] == 0x00) && (addr[3] == 0x00)) ||
-		 (port == 0x00) 
+		 ((addr[0] == 0x00) && (addr[1] == 0x00) && (addr[2] == 0x00) && (addr[3] == 0x00)) //||
+		 //(port == 0x00)
 		 ) 
 		return 0;
 	
 	// set destination IP
-	return GS.connect_socket(ip, (String)port);	
+	return GS.connectSocket(s, ip, port);
 }

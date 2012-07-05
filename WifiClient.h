@@ -29,7 +29,7 @@ class WifiClient : public Stream {
 public:
   WifiClient();
   WifiClient(uint8_t);
-  WifiClient(String, uint16_t);
+  WifiClient(String, String, uint8_t);
 
   uint8_t status();
   uint8_t connect();
@@ -57,8 +57,9 @@ public:
 private:
   static uint16_t _srcport;
   uint8_t _sock;
-  uint16_t _port;
-	String _ip;
+  String _port;
+  String _ip;
+  uint8_t _protocol;
 };
 
 #endif // _wifi_client_h_
