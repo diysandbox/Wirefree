@@ -33,7 +33,7 @@ String server = "74.125.224.83"; // Google
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
 // that you want to connect to (port 80 is default for HTTP):
-WifiClient client(server, 80);
+WifiClient client(server, "80", PROTO_TCP);
 
 void setup()
 {

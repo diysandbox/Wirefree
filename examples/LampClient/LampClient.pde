@@ -35,7 +35,7 @@ String server = "192.168.1.7"; // Hydrogen WebServer
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
 // that you want to connect to (port 80 is default for HTTP):
-WifiClient client(server, 80);
+WifiClient client(server, "80", PROTO_TCP);
 
 // this constant won't change.  It's the pin number
 // of the sensor's output:

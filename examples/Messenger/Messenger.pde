@@ -29,7 +29,7 @@ String server = "192.168.1.139";
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
 // that you want to connect to (port 80 is default for HTTP):
-WifiClient client(server, 3490);
+WifiClient client(server, "3490", PROTO_TCP);
 
 void setup()
 {
