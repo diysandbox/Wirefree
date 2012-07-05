@@ -114,7 +114,7 @@ uint16_t send(SOCKET s, const uint8_t * buf, uint16_t len)
  * 		
  * @return	1 for success else 0.
  */
-uint8_t connect(SOCKET s, String addr, uint16_t port)
+uint8_t connect(SOCKET s, String addr, String port)
 {
 	String ip;
 	
@@ -122,11 +122,11 @@ uint8_t connect(SOCKET s, String addr, uint16_t port)
 	if 
 		(
 		 ((addr[0] == 0xFF) && (addr[1] == 0xFF) && (addr[2] == 0xFF) && (addr[3] == 0xFF)) ||
-		 ((addr[0] == 0x00) && (addr[1] == 0x00) && (addr[2] == 0x00) && (addr[3] == 0x00)) ||
-		 (port == 0x00) 
+		 ((addr[0] == 0x00) && (addr[1] == 0x00) && (addr[2] == 0x00) && (addr[3] == 0x00)) //||
+		 //(port == 0x00)
 		 ) 
 		return 0;
 	
 	// set destination IP
-	return GS.connectSocket(s, ip, (String)port);
+	return GS.connectSocket(s, ip, port);
 }

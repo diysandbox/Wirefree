@@ -39,6 +39,7 @@ class IPPROTO {
 public:
   static const uint8_t TCP  = 6;
   static const uint8_t UDP  = 7;
+  static const uint8_t UDP_CLIENT = 8;
 };
 
 // command identifiers

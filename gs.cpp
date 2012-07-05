@@ -159,6 +159,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 		break;
 	}
 	case CMD_TCP_CONN:
+	case CMD_UDP_CONN:
 	{
 		String cmd_buf = cmd_str + this->ip + "," + this->port;
 		Serial.println(cmd_buf);
@@ -279,6 +280,7 @@ uint8_t GSClass::parse_resp(uint8_t cmd)
 			break;
 		}
 		case CMD_TCP_CONN:
+		case CMD_UDP_CONN:
 		{
 			if (buf.startsWith("CONNECT")) {
 				/* got CONNECT */
@@ -395,9 +397,11 @@ uint8_t GSClass::connect()
 	}
 
 	if (mode == 0) {
-		if (!send_cmd_w_resp(CMD_SET_WPA_PSK)) {
-			return 0;
-		}
+	    if (this->security_key != NULL) {
+		    if (!send_cmd_w_resp(CMD_SET_WPA_PSK)) {
+			    return 0;
+		    }
+	    }
 
 		if (!send_cmd_w_resp(CMD_SET_SSID)) {
 			return 0;
@@ -530,7 +534,8 @@ uint16_t GSClass::writeData(SOCKET s, const uint8_t*  buf, uint16_t  len)
 {	
 	if ((len == 0) || (buf[0] == '\r')){
 	} else {
-	    if (this->sock_table[s].protocol == IPPROTO::TCP) {
+	    if ((this->sock_table[s].protocol == IPPROTO::TCP) ||
+	            (this->sock_table[s].protocol == IPPROTO::UDP_CLIENT)) {
 	        Serial.write((uint8_t)0x1b);    // data start
 	        Serial.write((uint8_t)0x53);
 	        Serial.write((uint8_t)int_to_hex(this->client_cid));  // connection ID
@@ -751,8 +756,6 @@ void GSClass::parse_cmd(String buf)
 			                break;
 			            }
 			        }
-			    } else if (this->sock_table[sock].protocol == IPPROTO::UDP) {
-			        /* FIXME : add functionality */
 			    }
 			}
 		}
@@ -793,7 +796,7 @@ uint8_t GSClass::connectSocket(SOCKET s, String ip, String port)
 
 	if (this->sock_table[s].protocol == IPPROTO::TCP) {
 	    cmd = CMD_TCP_CONN;
-	} else if (this->sock_table[s].protocol == IPPROTO::UDP) {
+	} else if (this->sock_table[s].protocol == IPPROTO::UDP_CLIENT) {
 	    cmd = CMD_UDP_CONN;
 	}
 
