@@ -29,9 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "WifiClient.h"
 #include "WifiServer.h"
 
-WifiServer::WifiServer(uint16_t port)
+WifiServer::WifiServer(uint16_t port, uint8_t proto)
 {
   _port = port;
+  protocol = proto;
 }
 
 void WifiServer::begin()
@@ -39,12 +40,16 @@ void WifiServer::begin()
   for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
     WifiClient client(sock);
     if (client.status() == SOCK_STATUS::CLOSED) {
-      socket(sock, IPPROTO::TCP, _port, 0);
+      if (protocol == IPPROTO::TCP) {
+        socket(sock, IPPROTO::TCP, _port, 0);
+      } else if (protocol == IPPROTO::UDP) {
+        socket(sock, IPPROTO::UDP, _port, 0);
+      }
       listen(sock);
       Wirefree::_server_port[sock] = _port;
       break;
     }
-  }  
+  }
 }
 
 ARETTYPE WifiServer::write(uint8_t b)

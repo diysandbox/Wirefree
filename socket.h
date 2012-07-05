@@ -29,7 +29,7 @@ extern uint8_t listen(SOCKET s);	// Establish TCP connection (Passive connection
 extern uint16_t recv(SOCKET s, uint8_t * buf, uint16_t len);    // Receive data (TCP)
 extern void disconnect(SOCKET s);
 extern uint16_t send(SOCKET s, const uint8_t * buf, uint16_t len); // Send data (TCP)
-extern uint8_t connect(SOCKET s, String addr, uint16_t port); 
+extern uint8_t connect(SOCKET s, String addr, String port);
 
 #if 0
 extern uint8_t connect(SOCKET s, uint8_t * addr, uint16_t port); // Establish TCP connection (Active connection)

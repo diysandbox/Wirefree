@@ -43,6 +43,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ADHOC_MODE      1
 #define AP_MODE         2
 
+// TODO : change these values
+const uint8_t PROTO_TCP = 6;
+const uint8_t PROTO_UDP = 7;
+
 typedef struct _WIFI_PROFILE {
 	String ssid;
 	String security_key;
@@ -58,8 +62,8 @@ public:
 	void setLED(int color);
   static uint16_t _server_port[MAX_SOCK_NUM];
 
-  void begin(WIFI_PROFILE*, void (*rxDataHndlr)(String data));
-  void begin(WIFI_PROFILE*, void (*rxDataHndlr)(String data), uint8_t mode);
+  void begin(WIFI_PROFILE*);
+  void begin(WIFI_PROFILE*, uint8_t mode);
 
   void process();
   uint8_t connected();

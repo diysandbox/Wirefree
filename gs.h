@@ -38,6 +38,8 @@ public:
 class IPPROTO {
 public:
   static const uint8_t TCP  = 6;
+  static const uint8_t UDP  = 7;
+  static const uint8_t UDP_CLIENT = 8;
 };
 
 // command identifiers
@@ -51,13 +53,17 @@ public:
 //network
 #define CMD_DISABLE_DHCP 3
 #define CMD_ENABLE_DHCP  4
-#define CMD_LISTEN       6
+#define CMD_TCP_LISTEN   6
 #define CMD_TCP_CONN     7
 #define CMD_DNS_LOOKUP   9
 #define CMD_CLOSE_CONN   10
 #define CMD_NETWORK_SET  11
 #define CMD_WIRELESS_MODE 12
 #define CMD_ENABLE_DHCPSVR 13
+#define CMD_UDP_LISTEN   14
+#define CMD_UDP_CONN     15
+
+#define CMD_INVALID      255
 
 // device operation modes
 #define DEV_OP_MODE_COMMAND 0
@@ -90,12 +96,12 @@ typedef struct _SOCK_TABLE {
 class GSClass {
 public:
 	uint8_t mode;
-	uint8_t init(void (*rx_data_handler)(String data));
+	uint8_t init();
 	void configure(GS_PROFILE* prof);
 	uint8_t connect();
 	uint8_t connected();
 	void process();
-	uint8_t connect_socket(String ip, String port);
+	uint8_t connectSocket(SOCKET s, String ip, String port);
 	String dns_lookup(String url);
 	void send_data(String data);
 	void esc_seq_start();
@@ -105,6 +111,7 @@ public:
 	void configSocket(SOCKET s, uint8_t protocol, uint16_t port);
 	void execSocketCmd(SOCKET s, uint8_t cmd);
 	uint8_t readSocketStatus(SOCKET s);
+	uint8_t getSocketProtocol(SOCKET s);
 	uint8_t isDataOnSock(SOCKET s);
 	uint16_t readData(SOCKET s, uint8_t* buf, uint16_t len);
 	uint16_t writeData(SOCKET s, const uint8_t*  buf, uint16_t  len);
@@ -130,6 +137,8 @@ private:
 	SOCK_TABLE sock_table[4];
 	uint8_t socket_num;
 	SOCKET dataOnSock;
+	String srcIPUDP;
+	String srcPortUDP;
 
 	void (*rx_data_handler)(String data);
 

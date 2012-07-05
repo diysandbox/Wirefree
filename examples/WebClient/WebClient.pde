@@ -21,28 +21,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <Wirefree.h>
 #include <WifiClient.h>
 
-WIFI_PROFILE w_prof = { "Cisco32371",       /* SSID */
-                        "12345678" ,        /* WPA/WPA2 passphrase */
-                        NULL,               /* Set for DHCP */
-                        NULL,
-                        NULL
-                      };
+WIFI_PROFILE wireless_prof = {
+                        /* SSID */ "diysandbox",
+         /* WPA/WPA2 passphrase */ "12345678",
+                  /* IP address */ NULL,
+                 /* subnet mask */ NULL,
+                  /* Gateway IP */ NULL, };
 
 String server = "74.125.224.83"; // Google
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
 // that you want to connect to (port 80 is default for HTTP):
-WifiClient client(server, 80);
-
-void parseRxData(String data)
-{
-}
+WifiClient client(server, "80", PROTO_TCP);
 
 void setup()
 {
   // connect to AP & start server
-  Wireless.begin(&w_prof, &parseRxData);
+  Wireless.begin(&wireless_prof);
   
   // if you get a connection, report back via serial:
   if (client.connect()) {

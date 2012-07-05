@@ -26,19 +26,15 @@ This example code is in the public domain.
 #include <Wirefree.h>
 #include <WifiServer.h>
 
-WIFI_PROFILE w_prof = { "dd-wrt",       /* SSID */
-                        "12345678" ,        /* WPA/WPA2 passphrase */
-                        "192.168.1.7" ,   /* IP address */
-                        "255.255.255.0" ,   /* subnet mask */
-                        "192.168.1.1"   ,   /* Gateway IP */
-                      };
+WIFI_PROFILE wireless_prof = {
+                        /* SSID */ "diysandbox",
+         /* WPA/WPA2 passphrase */ "12345678",
+                  /* IP address */ "192.168.1.7",
+                 /* subnet mask */ "255.255.255.0",
+                  /* Gateway IP */ "192.168.1.1", };
 
 // port 80 is default for HTTP
-WifiServer server(80);
-
-void parseRxData(String data)
-{
-}
+WifiServer server(80, PROTO_TCP);
 
 void setup()
 {
@@ -47,7 +43,7 @@ void setup()
   delay(500);
   digitalWrite(7, LOW);
   // connect to AP & start server
-  Wireless.begin(&w_prof, &parseRxData);
+  Wireless.begin(&wireless_prof);
   server.begin();
 
   delay(1000);

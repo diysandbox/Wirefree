@@ -29,24 +29,20 @@ This example code is in the public domain.
 #include <Wirefree.h>
 #include <WifiServer.h>
 
-WIFI_PROFILE w_prof = { "DIYTank",       /* SSID */
-                        "12345678" ,        /* Not Currently used in AP_MODE */
-                        "192.168.1.1" ,     /* IP address */
-                        "255.255.255.0" ,   /* subnet mask */
-                        "192.168.1.1"   ,   /* Gateway IP */
-                      };
+WIFI_PROFILE wireless_prof = {
+                        /* SSID */ "diysandbox",
+         /* WPA/WPA2 passphrase */ "12345678",
+                  /* IP address */ "192.168.1.1",
+                 /* subnet mask */ "255.255.255.0",
+                  /* Gateway IP */ "192.168.1.1", };
                               
 // port 80 is default for HTTP
-WifiServer server(80);
-
-void parseRxData(String data)
-{
-}
+WifiServer server(80, PROTO_TCP);
 
 void setup()
 {
   // connect as AP & start server
-  Wireless.begin(&w_prof, &parseRxData, AP_MODE);
+  Wireless.begin(&wireless_prof, AP_MODE);
   server.begin();
   
   pinMode(7, OUTPUT);
