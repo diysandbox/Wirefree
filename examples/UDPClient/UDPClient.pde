@@ -23,15 +23,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 WIFI_PROFILE wireless_prof = {
                         /* SSID */ "diysandbox",
-         /* WPA/WPA2 passphrase */ "12345678",
-                  /* IP address */ "192.168.1.1",
+         /* WPA/WPA2 passphrase */ NULL,
+                  /* IP address */ "192.168.1.2",
                  /* subnet mask */ "255.255.255.0",
                   /* Gateway IP */ "192.168.1.1", };
 
-String server = "192.168.1.2"; // peer device IP address
+String remote_server = "192.168.1.1"; // peer device IP address
+String remote_port = "12345";
 
 // Initialize client with IP address and port number
-WifiClient client(server, 12345, PROTO_UDP);
+WifiClient client(remote_server, remote_port, PROTO_UDP);
 
 void setup()
 {
@@ -40,15 +41,14 @@ void setup()
   
   // if you get a connection, report back via serial:
   if (client.connect()) {
-    Serial.println("connection success..");
+    Serial.println("connected");
     
     // Send message over UDP socket to peer device
-    client.println("Hello World!\n");
-    client.flush();
+    client.println("Hello server!");
   } 
   else {
     // if connection setup failed:
-    Serial.println("connection failed..");
+    Serial.println("failed");
   }
 }
 
@@ -56,20 +56,13 @@ void loop()
 {
   // if there are incoming bytes available 
   // from the peer device, read them and print them:
-  if (client.available()) {
-    char c = client.read();
+  while (client.available()) {
+    int in;
 
-    Serial.print(c);
+    while ((in = client.read()) == -1);
+
+    Serial.print((char)in);
   }
 
-  // if the server disconnected, stop the client:
-  if (!client.connected()) {
-    Serial.println("disconnecting.");
-    client.stop();
-
-    // do nothing forevermore:
-    while(1)
-        delay(1000);
-  }  
-
+  delay(1);
 }

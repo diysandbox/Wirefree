@@ -28,7 +28,7 @@ WIFI_PROFILE wireless_prof = {
                  /* subnet mask */ "255.255.255.0",
                   /* Gateway IP */ "192.168.1.1", };
 
-WifiServer server(12344, PROTO_UDP);
+WifiServer server(12345, PROTO_UDP);
 
 void setup()
 {
@@ -44,36 +44,22 @@ void loop()
   // Listen for incoming clients
   WifiClient client = server.available();
 
-  char msgNum = 1;
-
   if (client) {
-    while (client.connected()) {
-      String msg;
+    // if there are incoming bytes available
+    // from the peer device, read them and print them:
+    while (client.available()) {
+      int in;
 
-      while (client.available()) {
-          char in;
+      while ((in = client.read()) == -1);
 
-          while ((in = client.read()) == -1);
+      Serial.print((char)in);
 
-          msg += in;
-          if (in == '\n') {
-            break;
-          }
-      }
-
-      switch (msgNum) {
-      case 1:
-        Serial.print(msg);
-        client.print("Hello from Hydrogen!! What is your name? ");
-        msgNum++;
-        break;
-      case 2:
-        client.print("Hello ");
-        client.println(msg);
-        msgNum = 1;
-        break;
-      }
+      if (in == 0xa)
+          break;
     }
+
+    // Send message over UDP socket to peer device
+    client.println("Hello client!");
 
     delay(1);
   }
