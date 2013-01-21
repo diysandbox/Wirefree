@@ -46,16 +46,17 @@ prog_char cmd_12[] PROGMEM = "AT+WM=2";
 prog_char cmd_13[] PROGMEM = "AT+DHCPSRVR=1";
 prog_char cmd_14[] PROGMEM = "AT+NSUDP=";
 prog_char cmd_15[] PROGMEM = "AT+NCUDP=";
+prog_char cmd_16[] PROGMEM = "ATB=115200,8,n,1";
 
 PROGMEM const char *cmd_tbl[] =
 {
 		cmd_0, cmd_1, cmd_2, cmd_3, cmd_4, cmd_5, cmd_6, cmd_7,
-		cmd_8, cmd_9, cmd_10, cmd_11, cmd_12, cmd_13, cmd_14, cmd_15,
+		cmd_8, cmd_9, cmd_10, cmd_11, cmd_12, cmd_13, cmd_14, cmd_15, cmd_16,
 };
 
 /* Make sure the cmd_buffer is large enough to hold
  * the largest command in the above table */
-char cmd_buffer[16];
+char cmd_buffer[17];
 
 
 uint8_t hex_to_int(char c)
@@ -114,6 +115,21 @@ uint8_t GSClass::init()
 		return 0;
 	}
 
+	if (baudRate == BAUD_115200)
+	{
+		send_cmd(CMD_BAUD115200);
+
+		Serial.end();
+		delay(1000);
+
+		Serial.begin(115200);
+		delay(1000);
+		flush();
+		Serial.println();
+		delay(1000);
+	}
+
+
 	// get device ID
 	if (!send_cmd_w_resp(CMD_GET_MAC_ADDR)) {
 		return 0;
@@ -137,6 +153,7 @@ uint8_t GSClass::send_cmd(uint8_t cmd)
 	case CMD_ENABLE_DHCP:
 	case CMD_GET_MAC_ADDR:
 	case CMD_WIRELESS_MODE:
+	case CMD_BAUD115200:
 	case CMD_ENABLE_DHCPSVR:
 	{
 		Serial.println(cmd_str);

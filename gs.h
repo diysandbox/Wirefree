@@ -62,6 +62,7 @@ public:
 #define CMD_ENABLE_DHCPSVR 13
 #define CMD_UDP_LISTEN   14
 #define CMD_UDP_CONN     15
+#define CMD_BAUD115200     16
 
 #define CMD_INVALID      255
 
@@ -73,6 +74,10 @@ public:
 // device wireless connection state
 #define DEV_CONN_ST_DISCONNECTED 0
 #define DEV_CONN_ST_CONNECTED    1
+
+// Baud Rate
+#define BAUD_9600		0
+#define BAUD_115200		1
 
 // connection ID
 #define INVALID_CID 255
@@ -101,6 +106,7 @@ public:
 	uint8_t connect();
 	uint8_t connected();
 	void process();
+	void setMaxSpeed();
 	uint8_t connectSocket(SOCKET s, String ip, String port);
 	String dns_lookup(String url);
 	void send_data(String data);
@@ -117,6 +123,7 @@ public:
 	uint16_t writeData(SOCKET s, const uint8_t*  buf, uint16_t  len);
 	
 	static const uint16_t SSIZE = 256; // Max Tx buffer siz
+	static const uint8_t baudRate = BAUD_9600;
 
 private:
 	String security_key;
