@@ -123,7 +123,7 @@ public:
 	uint16_t writeData(SOCKET s, const uint8_t*  buf, uint16_t  len);
 	
 	static const uint16_t SSIZE = 256; // Max Tx buffer siz
-	static const uint8_t baudRate = BAUD_115200;
+	static const uint8_t baudRate = BAUD_9600;
 
 private:
 	String security_key;
